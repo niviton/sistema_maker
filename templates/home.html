@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Controle de Acesso - Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='CNAT Maker.png') }}" alt="Logo do Lab">
+        <h1>Controle de Acesso do Lab</h1>
+    </header>
+    <main>
+        <h2>Selecione o tipo de usuário</h2>
+        <a class="btn" href="{{ url_for('visitante') }}">Visitante</a>
+        <a class="btn" href="{{ url_for('bolsista') }}">Bolsista</a>
+    </main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="messages">
+          {% for category, message in messages %}
+              <div class="alert {{ category }}">{{ message }}</div>
+          {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+    <footer>
+        <p>&copy; 2025 Lab. Todos os direitos reservados.</p>
+    </footer>
+</body>
+</html>

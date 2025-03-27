@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro Realizado - Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='CNAT Maker.png') }}" alt="Logo do Lab">
+        <h1>Registro Realizado</h1>
+    </header>
+    <main>
+        <p>Obrigado, {{ nome }}. Seu registro foi realizado com sucesso.</p>
+        <a class="btn" href="{{ url_for('home') }}">Voltar para a Home</a>
+    </main>
+    <footer>
+        <p>&copy; 2025 Lab. Todos os direitos reservados.</p>
+    </footer>
+</body>
+</html>

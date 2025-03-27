@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Bolsista Validado - Lab</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='CNAT Maker.png') }}" alt="Logo do Lab">
+        <h1>Bolsista Validado</h1>
+    </header>
+    <main>
+        <p>Olá, {{ nome }}. A porta foi aberta com sucesso.</p>
+        <a class="btn" href="{{ url_for('home') }}">Voltar para a Home</a>
+    </main>
+    <footer>
+        <p>&copy; 2025 Lab. Todos os direitos reservados.</p>
+    </footer>
+</body>
+</html>
