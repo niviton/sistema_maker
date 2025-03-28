@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Website</title>
+    <style>
+        /* Reset CSS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 180px 20px;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('https://lh3.googleusercontent.com/p/AF1QipPazkvEhFazil1umg40zjbFvha7R9gnRqIWCAAT=s680-w680-h510');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: white;
+            position: relative;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .hero p {
+            font-size: 1.5em;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 30px;
+            background-color: #ff6b6b;
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border: 2px solid #ff6b6b;
+        }
+
+        .cta-button:hover {
+            background-color: transparent;
+            color: #ff6b6b;
+        }
+
+        /* Services Section */
+        .services {
+            padding: 80px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .services h2 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            color: #2c3e50;
+            position: relative;
+            display: inline-block;
+        }
+
+        .services h2::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 3px;
+            background: #ff6b6b;
+            bottom: -10px;
+            left: 25%;
+        }
+
+        .service-description {
+            color: #7f8c8d;
+            margin-bottom: 60px;
+            font-size: 1.1em;
+        }
+
+        .service-item {
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 10px;
+            background: #f9f9f9;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .service-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .service-item h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .service-features {
+            list-style: none;
+            text-align: left;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .service-features li {
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+            color: #34495e;
+            font-size: 1.1em;
+        }
+
+        .service-features li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        /* Content Section */
+        .content-section {
+            padding: 60px 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            background-color: #f5f5f5;
+        }
+
+        .content-section p {
+            margin-bottom: 20px;
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 0.9em;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 120px 20px;
+            }
+            
+            .hero h1 {
+                font-size: 2em;
+            }
+            
+            .hero p {
+                font-size: 1.2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Welcome To Our Studio!</h1>
+            <p>IT'S NICE TO MEET YOU</p>
+            <a href="#" class="cta-button">TELL ME MORE</a>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services">
+        <h2>SERVICES</h2>
+        <p class="service-description">Lorem ipsum dolor sit amet consectetur adipisicing</p>
+        
+        <div class="service-item">
+            <h3>E-Commerce</h3>
+            <ul class="service-features">
+                <li>Responsive Design</li>
+                <li>Web Security</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Content Section -->
+    <section class="content-section">
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing</p>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing</p>
+        <p>Lorem ipsum dolor sit amet consectetur adipisicing</p>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2023 Our Studio. All rights reserved.
+    </footer>
+</body>
+</html>
