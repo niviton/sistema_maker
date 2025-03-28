@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNATMaker - Controle de Acesso</title>
+    <title>CNATMaker</title>
     <style>
         /* Reset CSS */
         * {
@@ -15,14 +15,15 @@
 
         body {
             line-height: 1.6;
-            color: #333;
+            color: white;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
 
-        /* Hero Section com imagem de fundo */
+        /* Hero Section */
         .hero {
+            flex-grow: 1;
             text-align: center;
             padding: 180px 20px;
             background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
@@ -32,11 +33,9 @@
             background-attachment: fixed;
             color: white;
             position: relative;
-            flex-grow: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
         }
 
         .hero-content {
@@ -48,22 +47,20 @@
 
         .hero h1 {
             font-size: 3em;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
             text-transform: uppercase;
             letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
-        /* Container dos botões */
-        .btn-container {
-            display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 40px;
-            flex-wrap: wrap;
+        .hero p {
+            font-size: 1.5em;
+            margin-bottom: 40px;
+            font-weight: 300;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
         }
 
-        /* Estilo dos botões */
-        .btn {
+        .cta-button {
             display: inline-block;
             padding: 15px 30px;
             background-color: #78d14f;
@@ -75,35 +72,33 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             border: 2px solid #78d14f;
-            min-width: 200px;
-            text-align: center;
+            font-size: 1.1em;
         }
 
-        .btn:hover {
+        .cta-button:hover {
             background-color: transparent;
             color: #78d14f;
-            transform: translateY(-3px);
         }
 
-        /* Navbar inferior */
-        .bottom-navbar {
-            background-color: #a7a7a7;
+        /* Navbar */
+        .content-navbar {
+            background-color: #ffffff;
             padding: 15px 0;
             width: 100%;
             text-align: center;
         }
 
-        .bottom-navbar ul {
+        .content-navbar ul {
             display: inline-flex;
             list-style: none;
         }
 
-        .bottom-navbar li {
+        .content-navbar li {
             margin: 0 20px;
         }
 
-        .bottom-navbar a {
-            color: white;
+        .content-navbar a {
+            color: #000000;
             text-decoration: none;
             font-size: 1.1em;
             padding: 10px 15px;
@@ -111,17 +106,22 @@
             transition: all 0.3s;
         }
 
-        .bottom-navbar a:hover {
+        .content-navbar a:hover {
             background-color: #78d14f;
         }
 
         /* Footer */
         footer {
             background-color: #78d14f;
-            color: white;
+            color: rgb(0, 0, 0);
             text-align: center;
             padding: 20px;
             font-size: 0.9em;
+        }
+
+        /* Formulário de Iniciar (escondido) */
+        .init-form {
+            display: none;
         }
 
         /* Responsivo */
@@ -134,38 +134,40 @@
                 font-size: 2em;
             }
             
-            .btn-container {
-                flex-direction: column;
-                gap: 15px;
+            .hero p {
+                font-size: 1.2em;
             }
 
-            .bottom-navbar ul {
+            .content-navbar ul {
                 flex-direction: column;
             }
 
-            .bottom-navbar li {
+            .content-navbar li {
                 margin: 5px 0;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Hero Section com imagem de fundo e botões -->
+    <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
-            <h1>Controle de Acesso</h1>
-            <p>Selecione o tipo de usuário</p>
+            <h1>Bem Vindo ao CNATMaker!</h1>
+            <p>Onde a imaginação vira realidade</p>
             
-            <div class="btn-container">
-                <a href="{{ url_for('visitante') }}" class="btn">Visitante</a>
-                <a href="{{ url_for('bolsista') }}" class="btn">Bolsista</a>
-            </div>
+            <!-- Botão Iniciar que submete o formulário -->
+            <a href="#" class="cta-button" onclick="document.getElementById('initForm').submit()">Iniciar</a>
+            
+            <!-- Formulário escondido para enviar o POST -->
+            <form id="initForm" class="init-form" action="/iniciar" method="POST">
+                <input type="hidden" name="iniciar" value="true">
+            </form>
         </div>
     </section>
 
-    <!-- Navbar inferior -->
-    <nav class="bottom-navbar">
-        <ul>
+    <!-- Navbar -->
+    <nav class="content-navbar">
+        <ul>    
             <li><a href="https://maker.cnat.ifrn.edu.br/sobre/">Sobre</a></li>
             <li><a href="https://maker.cnat.ifrn.edu.br/estrutura/">Estrutura</a></li>
             <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSdsn-f_Bjn8tTH4d9SO943Hu-xeNNuY67R2MOF18LBCWl7-4Q/viewform">Agendamento</a></li>
