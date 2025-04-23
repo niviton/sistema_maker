@@ -1,0 +1,111 @@
+/* style.css */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #002366; /* Cor principal baseada na identidade da logo */
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+header img {
+    max-width: 150px;
+}
+
+h1 {
+    margin: 10px 0;
+}
+
+main {
+    padding: 20px;
+    text-align: center;
+}
+
+form {
+    background-color: #fff;
+    padding: 20px;
+    margin: 20px auto;
+    border-radius: 5px;
+    max-width: 500px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    display: block;
+    text-align: left;
+    margin: 10px 0 5px;
+}
+
+input[type="text"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.btn {
+    display: inline-block;
+    background-color: #002366;
+    color: #fff;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    margin: 10px 0;
+}
+
+.btn:hover {
+    background-color: #00144a;
+}
+
+.voltar {
+    background-color: #555;
+}
+
+.voltar:hover {
+    background-color: #333;
+}
+
+footer {
+    background-color: #002366;
+    color: #fff;
+    text-align: center;
+    padding: 10px;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}
+
+.messages {
+    max-width: 500px;
+    margin: 10px auto;
+    text-align: center;
+}
+
+.alert {
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 4px;
+}
+
+.alert.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.alert.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+}
+
+.alert.danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Bolsista Validado - CNATMaker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    /* Reset e fontes */
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Arial',sans-serif; }
+    html, body { height:100%; width:100%; }
+    body {
+      display:flex; flex-direction:column;
+      color:white; overflow:hidden; line-height:1.6;
+    }
+
+    /* Fundo completo com overlay sutil */
+    .full-screen {
+      flex:1;
+      background: url('/static/cnat.png') no-repeat center center/cover;
+      position:relative;
+    }
+    .overlay {
+      position:absolute; top:0;left:0;right:0;bottom:0;
+      background:rgba(0,0,0,0.1);
+      display:flex; flex-direction:column; justify-content:center; align-items:center;
+      padding:20px; text-align:center;
+    }
+
+    /* Container principal */
+    .content-box {
+      background:rgba(255,255,255,0.95);
+      color:#333;
+      padding:30px; border-radius:10px;
+      max-width:800px; width:100%;
+      box-shadow:0 5px 15px rgba(0,0,0,0.3);
+      margin-bottom:40px;
+    }
+    .content-box h1 {
+      font-size:2.5em; margin-bottom:20px;
+      text-shadow:2px 2px 4px rgba(0,0,0,0.5);
+    }
+    .content-box p {
+      font-size:1.1em; margin-bottom:20px;
+    }
+
+    /* Flash messages */
+    .flash-messages { margin-bottom:20px; }
+    .alert {
+      padding:12px 20px;
+      border-radius:5px;
+      margin-bottom:10px;
+      font-weight:bold;
+      color:white;
+    }
+    .alert-success { background-color:#78d14f; }
+    .alert-danger  { background-color:#d9534f; }
+    .alert-info    { background-color:#5bc0de; }
+
+    /* Abas lado a lado */
+    .tabs {
+      display:flex;
+      gap:20px;
+      flex-wrap:wrap;
+    }
+    .tab {
+      flex:1;
+      min-width:250px;
+    }
+    .tab h2 {
+      margin-bottom:10px;
+    }
+
+    /* Formulários internos */
+    .tab form {
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+    }
+    .tab select {
+      padding:12px; margin-bottom:15px;
+      border:1px solid #ccc; border-radius:5px;
+      font-size:1em;
+    }
+    .tab .btn {
+      margin-top:5px;
+    }
+
+    /* Botão voltar fixado na base da content-box */
+    .fix-bottom {
+      margin-top:20px;
+    }
+
+    /* Botões padrão */
+    .btn {
+      padding:12px 25px;
+      background-color:#78d14f;
+      color:white; text-decoration:none;
+      border:none; border-radius:5px;
+      font-size:1em; font-weight:bold;
+      text-transform:uppercase; letter-spacing:1px;
+      cursor:pointer; transition:all .3s ease;
+    }
+    .btn:hover {
+      background-color:transparent; color:#78d14f; border:2px solid #78d14f;
+    }
+    .btn.voltar {
+      background-color:#a7a7a7;
+      margin-top:10px;
+    }
+    .btn.voltar:hover {
+      background-color:transparent; color:#a7a7a7; border:2px solid #a7a7a7;
+    }
+
+    /* Responsivo */
+    @media(max-width:768px) {
+      .tabs { flex-direction:column; }
+      .content-box { padding:20px; }
+      .content-box h1 { font-size:2em; }
+    }
+  </style>
+</head>
+<body>
+  <section class="full-screen">
+    <div class="overlay">
+
+      <!-- Caixa principal -->
+      <div class="content-box">
+        <h1>Bolsista Validado</h1>
+        
+        <p>Olá, <strong>{{ nome }}</strong>. O estado atual do laboratório: <strong>{{ estado }}</strong></p>
+
+        <!-- Flash messages -->
+        <div class="flash-messages">
+          {% with msgs = get_flashed_messages(with_categories=true) %}
+            {% for category, text in msgs %}
+              <div class="alert alert-{{ category }}">{{ text }}</div>
+            {% endfor %}
+          {% endwith %}
+        </div>
+
+        
+
+        <!-- Abas lado a lado -->
+        <div class="tabs">
+
+          <!-- Aba 1: Marcar Ponto -->
+          <div class="tab">
+            <h2>Marcar Ponto</h2>
+            <form action="{{ url_for('marcar_ponto') }}" method="post">
+              <input type="hidden" name="nome" value="{{ nome }}">
+              <input type="hidden" name="matricula" value="{{ matricula }}">
+              <select name="acao" required>
+                <option value="" disabled selected>Entrada ou Saída?</option>
+                <option value="entrada">Entrada</option>
+                <option value="saida">Saída</option>
+              </select>
+              <button type="submit" class="btn">Confirmar Ponto</button>
+            </form>
+          </div>
+
+          <!-- Aba 2: Atualizar Estado -->
+          <div class="tab">
+            <h2>Atualizar Estado do Lab</h2>
+            <form action="{{ url_for('atualizar_estado') }}" method="post">
+              <select name="estado" required>
+                <option value="" disabled selected>Selecione...</option>
+                <option value="ABERTO">ABERTO</option>
+                <option value="ALMOCO">ALMOÇO</option>
+                <option value="RESERVADO">RESERVADO</option>
+                <option value="FECHADO">FECHADO</option>
+              </select>
+              <button type="submit" class="btn">Atualizar</button>
+            </form>
+          </div>
+
+        </div> <!-- fim .tabs -->
+
+        <!-- Botão Voltar -->
+        <div class="fix-bottom">
+          <a href="{{ url_for('home') }}" class="btn voltar">Voltar à Home</a>
+        </div>
+      </div> <!-- fim .content-box -->
+
+    </div>
+  </section>
+</body>
+</html>
