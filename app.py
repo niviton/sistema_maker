@@ -1,5 +1,6 @@
-
-import csv, os, sys
+import csv
+import os
+import sys
 from urllib.parse   import urlencode
 from urllib.request import urlopen
 from flask import Flask, render_template, request, redirect, url_for, flash
@@ -15,7 +16,9 @@ if sys.platform.startswith("win"):
         @staticmethod
         def setup(pin, mode): pass
         @staticmethod
-        def output(pin, value): print(f"[GPIO SIMULADO] pino {pin} -> {value}")
+        def output(pin, value):
+            # sem f-string, usando format()
+            print("[GPIO SIMULADO] pino {} -> {}".format(pin, value))
 else:
     import RPi.GPIO as GPIO
 
@@ -45,6 +48,7 @@ if not os.path.exists(PONTOS_CSV):
 # Funções auxiliares
 def abrir_porta():
     GPIO.output(DOOR_PIN, GPIO.HIGH)
+    # usando lambda para fechar
     Timer(5, lambda: GPIO.output(DOOR_PIN, GPIO.LOW)).start()
 
 def get_estado_lab():
@@ -56,13 +60,14 @@ def set_estado_lab(novo):
 
 def enviar_para_sheets(params):
     qs = urlencode(params)
-    url = f"{SHEETS_WEBAPP_URL}?{qs}"
+    # sem f-string
+    url = "{}?{}".format(SHEETS_WEBAPP_URL, qs)
     try:
         with urlopen(url, timeout=5) as resp:
             text = resp.read().decode()
-            app.logger.info(f"Sheets respondeu: {text}")
+            app.logger.info("Sheets respondeu: {}".format(text))
     except Exception as e:
-        app.logger.error(f"Erro enviando ao Sheets: {e}")
+        app.logger.error("Erro enviando ao Sheets: {}".format(e))
 
 # Rotas
 @app.route('/')
@@ -122,7 +127,12 @@ def bolsista():
             return render_template('bolsista_fail.html')
         abrir_porta()
         flash("Bolsista validado. Porta aberta!", "success")
-        return render_template('bolsista_success.html', nome=nome, matricula=matricula, estado=get_estado_lab())
+        return render_template(
+            'bolsista_success.html',
+            nome=nome,
+            matricula=matricula,
+            estado=get_estado_lab()
+        )
     return render_template('bolsista.html')
 
 @app.route('/marcar_ponto', methods=['POST'])
@@ -137,17 +147,26 @@ def marcar_ponto():
     rows = list(csv.reader(open(PONTOS_CSV,'r',newline='')))
     if acao == 'entrada':
         rows.append([nome, matricula, date_str, time_str, '', ''])
-        flash(f"Ponto de Entrada: {date_str}, {time_str}", "success")
+        flash("Ponto de Entrada: {}, {}".format(date_str, time_str), "success")
     else:
         updated = False
         for i in range(len(rows)-1, 0, -1):
             r = rows[i]
             if r[0]==nome and r[1]==matricula and r[4]=='':
-                ent_dt  = datetime.strptime(f"{r[2]} {r[3]}", '%Y-%m-%d %H:%M:%S')
-                dur_min = round((now - ent_dt).total_seconds() / 60, 2)
+                ent_dt  = datetime.strptime(
+                    "{} {}".format(r[2], r[3]),
+                    '%Y-%m-%d %H:%M:%S'
+                )
+                dur_min = round(
+                    (now - ent_dt).total_seconds() / 60, 2
+                )
                 r[4] = time_str
                 r[5] = str(dur_min)
-                flash(f"Ponto de Saída: {date_str}, {time_str} (duração {dur_min} min)", "success")
+                flash(
+                    "Ponto de Saída: {}, {} (duração {} min)"
+                    .format(date_str, time_str, dur_min),
+                    "success"
+                )
                 updated = True
                 break
         if not updated:
@@ -164,7 +183,12 @@ def marcar_ponto():
         'hora': time_str
     })
 
-    return render_template('bolsista_success.html', nome=nome, matricula=matricula, estado=get_estado_lab())
+    return render_template(
+        'bolsista_success.html',
+        nome=nome,
+        matricula=matricula,
+        estado=get_estado_lab()
+    )
 
 @app.route('/cadastrar_bolsista', methods=['POST'])
 def cadastrar_bolsista():
@@ -180,10 +204,10 @@ def atualizar_estado():
     novo = request.form.get('estado')
     if novo:
         set_estado_lab(novo)
-        flash(f"Estado do laboratório atualizado para: {novo}", "info")
+        flash("Estado do laboratório atualizado para: {}".format(novo), "info")
     else:
         flash("Nenhum estado fornecido.", "warning")
-    return redirect(url_for('bolsista'))
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')
