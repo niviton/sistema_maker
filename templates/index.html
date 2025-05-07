@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,152 +6,126 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CNATMaker</title>
   <style>
-    /* Reset CSS */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Arial', sans-serif;
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Arial',sans-serif;}
+    html,body{height:100%}
+    body{line-height:1.6;color:white;display:flex;flex-direction:column;overflow:hidden;}
+    .full-screen{position:relative;width:100%;height:100%;background-size:cover;background-position:center;background-repeat:no-repeat;}
+    .overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:transparent;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:20px;}
+    .overlay h1{font-size:3em;margin-bottom:20px;text-shadow:2px 2px 4px rgba(0,0,0,0.5);}
+    .overlay p{font-size:1.5em;margin-bottom:40px;text-shadow:1px 1px 3px rgba(0,0,0,0.5);}
+    
+    /* Botão melhorado */
+    .cta-button,.sair-button{
+      display:inline-block;
+      padding:15px 30px;
+      background-color:#78d14f;
+      color:white;
+      text-decoration:none;
+      border-radius:50px;
+      transition:all 0.3s ease;
+      font-weight:bold;
+      text-transform:uppercase;
+      letter-spacing:1px;
+      border:2px solid #78d14f;
+      font-size:1.1em;
+      margin-top:20px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
     
-    html, body {
-      height: 100%;
+    .cta-button:hover,.sair-button:hover{
+      background-color:#5ca83d;
+      transform: translateY(-3px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
     }
     
-    body {
-      line-height: 1.6;
-      color: white;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+    /* Efeito de pulsar para chamar atenção */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
     
-    /* Seção de tela completa */
-    .full-screen {
+    .cta-button {
+      animation: pulse 2s infinite;
+      min-width: 220px;
       position: relative;
-      width: 100%;
-      height: 100%;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
     }
     
-    /* Overlay totalmente translúcida (sem cor) */
-    .overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: transparent;  /* Overlay sem opacidade */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 20px;
-    }
-    
-    .overlay h1 {
-      font-size: 3em;
-      margin-bottom: 20px;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }
-    
-    .overlay p {
-      font-size: 1.5em;
-      margin-bottom: 40px;
-      text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
-    }
-    
-    /* Botões */
-    .cta-button, .sair-button {
-      display: inline-block;
-      padding: 15px 30px;
-      background-color: #78d14f;
-      color: white;
-      text-decoration: none;
-      border-radius: 50px;
-      transition: all 0.3s ease;
+    /* Instrução clara */
+    .instruction {
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 10px 20px;
+      border-radius: 30px;
+      margin-bottom: 15px;
+      border-left: 4px solid #78d14f;
+      border-right: 4px solid #78d14f;
       font-weight: bold;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      border: 2px solid #78d14f;
-      font-size: 1.1em;
-      margin-top: 20px;
     }
     
-    .cta-button:hover, .sair-button:hover {
-      background-color: transparent;
-      color: #78d14f;
+    /* Seta indicativa */
+    .arrow-down {
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-top: 15px solid white;
+      margin: 10px auto;
+      animation: bounce 1.5s infinite;
     }
     
-    /* Botão Sair fixado na parte inferior */
-    .sair-button {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+    @keyframes bounce {
+      0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+      40% {transform: translateY(-15px);}
+      60% {transform: translateY(-7px);}
     }
     
-    /* Responsivo */
-    @media (max-width: 768px) {
-      .overlay h1 {
-        font-size: 2em;
-      }
-      
-      .overlay p {
-        font-size: 1.2em;
-      }
-    }
+    .sair-button{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);}
+    
+    @media (max-width:768px){.overlay h1{font-size:2em;}.overlay p{font-size:1.2em;}}
   </style>
 </head>
 <body>
-  {% if estado == "ABERTO" %}
-  <!-- Interface para laboratório ABERTO -->
-  <section class="full-screen" style="background-image: url('/static/cnat.png');">
-    <!-- AQUI está a diferença: o fundo do overlay passa a ser escuro -->
-    <div class="overlay" style="background: rgba(0, 0, 0, 0.6);">
-      <h1>Bem Vindo ao CNATMaker!</h1>
-      <p>Onde a imaginação vira realidade</p>
-      <!-- Botão Iniciar envia POST para /iniciar -->
-      <a href="#" class="cta-button" onclick="document.getElementById('initForm').submit()">Iniciar</a>
-      <!-- Formulário escondido -->
-      <form id="initForm" style="display:none;" action="/iniciar" method="POST">
-        <input type="hidden" name="iniciar" value="true">
-      </form>
-    </div>
-  </section>
+{% if estado == "ABERTO" %}
+<section class="full-screen" style="background-image: url('/static/cnat.png');">
+  <div class="overlay" style="background: rgba(0, 0, 0, 0.6);">
+    <h1>Bem Vindo ao CNATMaker!</h1>
+    <p>Onde a imaginação vira realidade</p>
+    
+    <div class="instruction">LABORATÓRIO ABERTO - Clique no botão para entrar</div>
+    <div class="arrow-down"></div>
+    
+    <a href="#" class="cta-button" onclick="document.getElementById('initForm').submit()">ENTRAR NO LABORATÓRIO</a>
+    
+    <form id="initForm" style="display:none;" action="/iniciar" method="POST">
+      <input type="hidden" name="iniciar" value="true">
+    </form>
+  </div>
+</section>
 {% else %}
-
-    <!-- Interface para outros estados (ALMOCO, RESERVADO, FECHADO, etc.) -->
-    <section class="full-screen" style="
-      background-image: 
-        {% if estado == 'ALMOCO' %}
-          url('{{ url_for('static', filename='lab_almoco.png') }}')
-        {% elif estado == 'RESERVADO' %}
-          url('{{ url_for('static', filename='lab_reservado.png') }}')
-        {% elif estado == 'FECHADO' %}
-          url('{{ url_for('static', filename='lab_fechado.png') }}')
-        {% else %}
-          url('{{ url_for('static', filename='default_bg.png') }}')
-        {% endif %}
-    ">
-      <div class="overlay">
-        <h1></h1>
-        {% if estado == "ALMOCO" %}
-          <p></p>
-        {% elif estado == "RESERVADO" %}
-          <p></p>
-        {% elif estado == "FECHADO" %}
-          <p></p>
-        {% else %}
-          <p>{{ estado }}</p>
-        {% endif %}
-        <!-- Botão Sair fixado na parte inferior -->
-        <button class="sair-button" onclick="window.location.href='{{ url_for('home') }}'">Sair</button>
-      </div>
-    </section>
-  {% endif %}
-</body>
+<section class="full-screen" style="background-image:
+  {% if estado == 'ALMOCO' %}
+    url('{{ url_for('static', filename='lab_almoco.png') }}')
+  {% elif estado == 'RESERVADO' %}
+    url('{{ url_for('static', filename='lab_reservado.png') }}')
+  {% elif estado == 'FECHADO' %}
+    url('{{ url_for('static', filename='lab_fechado.png') }}')
+  {% else %}
+    url('{{ url_for('static', filename='default_bg.png') }}')
+  {% endif %}">
+  <div class="overlay">
+    <h1></h1>
+    {% if estado == "ALMOCO" %}
+      <p></p>
+    {% elif estado == "RESERVADO" %}
+      <p></p>
+    {% elif estado == "FECHADO" %}
+      <p></p>
+    {% else %}
+      <p>{{ estado }}</p>
+    {% endif %}
+    <button class="sair-button" onclick="window.location.href='{{ url_for('home') }}'">Sair</button>
+  </div>
+</section>
+{% endif %}
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'938ab35bb6cff1e3',t:'MTc0NjA1NDUwMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>

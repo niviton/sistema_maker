@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Painel de Administração – CNATMaker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --green: #28a745;
+      --green-dark: #218838;
+      --gray-light: #f8f9fa;
+      --gray:rgb(136, 139, 143);
+      --text-dark:rgb(63, 73, 82);
+      --radius: 8px;
+      --spacing: 16px;
+      --transition: 0.2s ease-in-out;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body, html { height:100%; font-family: 'Segoe UI', Tahoma, sans-serif; color: var(--text-dark); }
+
+    /* Header */
+    header {
+      background: var(--green);
+      color: white;
+      padding: var(--spacing);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    header h1 {
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+    }
+    header nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: var(--spacing);
+      font-weight: bold;
+      transition: opacity var(--transition);
+    }
+    header nav a:hover {
+      opacity: 0.8;
+    }
+
+    /* Main layout */
+    .container {
+      display: flex;
+      flex-direction: column;
+      padding: calc(var(--spacing)*2);
+      background: var(--gray-light);
+      min-height: calc(100vh - 64px);
+    }
+
+    /* Cards grid */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: var(--spacing);
+      margin-bottom: var(--spacing);
+    }
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .card header {
+      background: var(--gray);
+      padding: var(--spacing);
+      font-size: 1.1rem;
+      font-weight: bold;
+      text-align: center;
+    }
+    .card .card-body {
+      padding: var(--spacing);
+      flex: 1;
+    }
+    .card .card-body form {
+      display: flex;
+      flex-direction: column;
+    }
+    .card .card-body label {
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+    .card .card-body input,
+    .card .card-body select {
+      padding: 10px;
+      margin-bottom: var(--spacing);
+      border: 1px solid var(--gray);
+      border-radius: var(--radius);
+      font-size: 1rem;
+    }
+    .card .card-body button {
+      padding: 12px;
+      background: var(--green);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .card .card-body button:hover {
+      background: var(--green-dark);
+    }
+
+    /* Footer actions */
+    .actions {
+      text-align: center;
+    }
+    .actions .btn-back {
+      display: inline-block;
+      margin-top: var(--spacing);
+      padding: 12px 24px;
+      background: var(--gray);
+      color: var(--text-dark);
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-weight: bold;
+      transition: background var(--transition);
+    }
+    .actions .btn-back:hover {
+      background: #ccc;
+    }
+
+    /* Flash messages */
+    .flash-container {
+      margin-bottom: var(--spacing);
+    }
+    .flash-container .alert {
+      padding: var(--spacing);
+      border-radius: var(--radius);
+      margin-bottom: var(--spacing);
+      font-weight: bold;
+    }
+    .alert-success { background: var(--green); color: white; }
+    .alert-danger  { background: #dc3545; color: white; }
+    .alert-info    { background: #17a2b8; color: white; }
+
+    @media(max-width: 600px) {
+      header h1 { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>CNATMaker – Painel Admin</h1>
+    <nav>
+      <a href="{{ url_for('home') }}">Home</a>
+      <a href="{{ url_for('index') }}">Início</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <!-- Flash -->
+    <div class="flash-container">
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in msgs %}
+          <div class="alert alert-{{ cat }}">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+    </div>
+
+    <!-- Cards de formulários -->
+    <div class="cards">
+      <!-- Adicionar Bolsista -->
+      <div class="card">
+        <header>Adicionar Bolsista</header>
+        <div class="card-body">
+          <form action="{{ url_for('cadastrar_bolsista') }}" method="post">
+            <label for="nome">Nome:</label>
+            <input type="text" id="nome" name="nome" required>
+            <label for="matricula">Matrícula:</label>
+            <input type="text" id="matricula" name="matricula" required>
+            <button type="submit">Adicionar</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Remover Bolsista -->
+      <div class="card">
+        <header>Remover Bolsista</header>
+        <div class="card-body">
+          <form action="{{ url_for('remover_bolsista') }}" method="post">
+            <label for="chave">Nome ou Matrícula:</label>
+            <input type="text" id="chave" name="chave" placeholder="Ex: João ou 2012345" required>
+            <button type="submit">Remover</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botão Voltar -->
+    <div class="actions">
+      <a href="{{ url_for('home') }}" class="btn-back">Voltar ao Menu</a>
+    </div>
+  </div>
+</body>
+</html>

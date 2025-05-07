@@ -13,6 +13,60 @@
             font-family: 'Arial', sans-serif;
         }
 
+        /* CSS: Navbar fixa embaixo */
+        .navbar-bottom {
+          position: fixed;
+          bottom: 0; left: 0; right: 0;
+          background: #ffffff;
+          border-top: 1px solid #e0e0e0;
+          box-shadow: 0 -2px 4px rgba(0,0,0,0.05);
+          z-index: 1000;
+        }
+        .navbar-bottom .nav-links {
+          display: flex;
+          justify-content: center;
+          gap: 32px;
+          list-style: none;
+          padding: 8px 0;
+          margin: 0;
+        }
+        .navbar-bottom .nav-links a {
+          color: #444;
+          text-decoration: none;
+          font-weight: 500;
+          padding: 8px 12px;
+          border-radius: 4px;
+          transition: background 0.2s, color 0.2s;
+        }
+        .navbar-bottom .nav-links a:hover {
+          background-color: #f0f0f0;
+          color: #28a745;
+        }
+        .navbar-bottom .login {
+          color: #007bff;
+        }
+        .navbar-bottom .login:hover {
+          background-color: #e7f1ff;
+        }
+        .navbar-bottom .logout {
+          color: #dc3545;
+        }
+        .navbar-bottom .logout:hover {
+          background-color: #fdecea;
+        }
+        
+        /* Evita que o conteúdo fique por baixo da navbar */
+        body {
+          padding-bottom: 56px; /* ajuste conforme a altura real da navbar */
+        }
+        
+        /* Responsivo: reduz espaçamento em telas pequenas */
+        @media (max-width: 600px) {
+          .navbar-bottom .nav-links {
+            gap: 16px;
+          }
+        }
+        
         body {
             line-height: 1.6;
             color: #333;
@@ -164,17 +218,25 @@
     </section>
 
     <!-- Navbar inferior -->
-    <nav class="bottom-navbar">
-        <ul>
-            <li><a href="https://maker.cnat.ifrn.edu.br/sobre/">Sobre</a></li>
-            <li><a href="https://maker.cnat.ifrn.edu.br/estrutura/">Estrutura</a></li>
-            <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSdsn-f_Bjn8tTH4d9SO943Hu-xeNNuY67R2MOF18LBCWl7-4Q/viewform">Agendamento</a></li>
-        </ul>
-    </nav>
+ <!-- HTML: Navbar fixa embaixo -->
+<nav class="navbar-bottom">
+    <ul class="nav-links">
+      <li><a href="{{ url_for('index') }}">Início</a></li>
+      <li><a href="{{ url_for('home') }}">Home</a></li>
+      {% if is_admin %}
+        <li><a href="{{ url_for('admin') }}">Admin</a></li>
+        <li><a href="{{ url_for('logout') }}" class="logout">Sair</a></li>
+      {% else %}
+        <li><a href="{{ url_for('login') }}" class="login">Admin</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+  
+  
+      
+      
 
     <!-- Footer -->
-    <footer>
-        &copy; 2025 CNATMaker. Todos os direitos reservados.
-    </footer>
+    
 </body>
 </html>
