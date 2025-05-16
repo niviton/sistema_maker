@@ -1,1259 +1,159 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <title>Registro de Visitante - CNATMaker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* Reset CSS */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', 'Arial', sans-serif;
-    }
-    
-    body {
-      line-height: 1.6;
-      color: white;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background-color: #f5f5f5;
-    }
-
-    /* Conteúdo principal com imagem de fundo */
-    main {
-      flex-grow: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 40px 20px;
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI','Arial',sans-serif}
+    body{line-height:1.6;background:#f5f5f5;display:flex;flex-direction:column;min-height:100vh}
+    main{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
+      padding:40px 20px;
       background:
-        linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.5), rgba(0,0,0,0.7)),
-        url('https://lh3.googleusercontent.com/p/AF1QipPazkvEhFazil1umg40zjbFvha7R9gnRqIWCAAT=s1360-w1360-h1020-rw') no-repeat center/cover;
-      background-attachment: fixed;
-      position: relative;
-    }
-
-    .page-title {
-      font-size: 2.5em;
-      text-align: center;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-      margin-bottom: 30px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      color: #ffffff;
-    }
-
-    /* Formulário */
-    form {
-      background-color: rgba(255,255,255,0.97);
-      color: #2c3e50;
-      padding: 35px;
-      border-radius: 12px;
-      width: 100%;
-      max-width: 650px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-      margin-bottom: 20px;
-      transition: all 0.3s ease;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 600;
-      color: #34495e;
-    }
-    
-    input, select {
-      width: 100%;
-      padding: 12px 15px;
-      margin-bottom: 22px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      font-size: 1em;
-      color: #2c3e50;
-      transition: all 0.3s ease;
-      background-color: #f9f9f9;
-    }
-    
-    input:focus, select:focus {
-      outline: none;
-      border-color: #78d14f;
-      box-shadow: 0 0 0 3px rgba(120, 209, 79, 0.2);
-      background-color: #fff;
-    }
-    
-    select {
-      appearance: none;
-      background-image: url("data:image/svg+xml;utf8,<svg fill='%2378d14f' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-    }
-
-    /* Extras Empréstimo */
-    #extra-emprestimo,
-    #emprestimos-tree,
-    #extra-visita-tecnica {
-      display: none;
-      margin-bottom: 25px;
-    }
-    
-    #extra-emprestimo,
-    #extra-visita-tecnica {
-      padding: 20px;
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      border-left: 4px solid #78d14f;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-
-    /* Árvore de Empréstimos */
-    #emprestimos-tree {
-      padding: 20px;
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      border-left: 4px solid #78d14f;
-      margin-top: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    
-    #emprestimos-tree label {
-      display: inline;
-      font-weight: normal;
-      margin-bottom: 0;
-      cursor: pointer;
-    }
-    
-    #emprestimos-tree > label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 15px;
-      color: #34495e;
-    }
-    
-    #emprestimos-tree ul {
-      list-style: none;
-      padding-left: 1.5em;
-      margin: 0;
-    }
-    
-    #emprestimos-tree li {
-      margin: 10px 0;
-      position: relative;
-    }
-    
-    #emprestimos-tree .toggle {
-      cursor: pointer;
-      user-select: none;
-      font-weight: 600;
-      color: #2c3e50;
-      display: flex;
-      align-items: center;
-      transition: all 0.2s ease;
-    }
-    
-    #emprestimos-tree .toggle:hover {
-      color: #78d14f;
-    }
-    
-    #emprestimos-tree .toggle::before {
-      content: '\f105';
-      font-family: 'Font Awesome 6 Free';
-      font-weight: 900;
-      display: inline-block;
-      width: 1.2em;
-      transition: transform 0.2s ease;
-      color: #78d14f;
-    }
-    
-    #emprestimos-tree .toggle.open::before {
-      transform: rotate(90deg);
-    }
-    
-    /* esconde sublistas */
-    #emprestimos-tree ul ul {
-      display: none;
-      margin-top: 8px;
-      margin-bottom: 5px;
-    }
-    
-    /* exibe quando classe c-open */
-    #emprestimos-tree li.c-open > ul {
-      display: block;
-    }
-    
-    /* checkbox e número alinhados */
-    #emprestimos-tree input[type="checkbox"] {
-      margin-right: 8px;
-      width: auto;
-      vertical-align: middle;
-      margin-bottom: 0;
-      cursor: pointer;
-    }
-    
-    #emprestimos-tree input[type="number"] {
-      width: 65px;
-      margin-left: 12px;
-      display: none;
-      padding: 5px 8px;
-      vertical-align: middle;
-      margin-bottom: 0;
-      border-radius: 4px;
-      border: 1px solid #ccc;
-      text-align: center;
-    }
-    
-    /* exibe número quando checkbox marcado */
-    #emprestimos-tree input[type="checkbox"]:checked + label + input[type="number"] {
-      display: inline-block;
-      animation: fadeIn 0.3s;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Botões */
-    .btn {
-      display: inline-block;
-      padding: 14px 25px;
-      background-color: #78d14f;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 1em;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      width: 100%;
-      text-align: center;
-      text-decoration: none;
-      box-shadow: 0 4px 6px rgba(120, 209, 79, 0.2);
-    }
-    
-    .btn:hover {
-      background-color: #6bc045;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(120, 209, 79, 0.3);
-    }
-    
-    .btn:active {
-      transform: translateY(0);
-      box-shadow: 0 2px 4px rgba(120, 209, 79, 0.2);
-    }
-    
-    .voltar {
-      background-color: #a7a7a7;
-      margin-top: 0;
-      max-width: 650px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .voltar:hover {
-      background-color: #8c8c8c;
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-    
-    .btn i {
-      margin-right: 8px;
-    }
-
-    /* Navbar fixa inferior */
-    .content-navbar {
-      background-color: rgba(167, 167, 167, 0.95);
-      padding: 15px 0;
-      width: 100%;
-      text-align: center;
-      position: fixed;
-      bottom: -100px;
-      transition: bottom 0.3s ease;
-      z-index: 100;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-      backdrop-filter: blur(5px);
-    }
-    
-    body.scrolled .content-navbar {
-      bottom: 0;
-    }
-    
-    .content-navbar ul {
-      display: inline-flex;
-      list-style: none;
-      gap: 10px;
-    }
-    
-    .content-navbar li {
-      margin: 0 15px;
-    }
-    
-    .content-navbar a {
-      color: white;
-      text-decoration: none;
-      padding: 10px 15px;
-      border-radius: 5px;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      font-weight: 500;
-    }
-    
-    .content-navbar a i {
-      margin-right: 6px;
-    }
-    
-    .content-navbar a:hover {
-      background-color: #78d14f;
-      transform: translateY(-2px);
-    }
-
-    footer {
-      background-color: #78d14f;
-      color: white;
-      text-align: center;
-      padding: 20px;
-      margin-top: auto;
-      font-weight: 500;
-      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    @media (max-width: 768px) {
-      .page-title { font-size: 2em; }
-      form { padding: 25px; }
-      .content-navbar ul { 
-        flex-direction: column; 
-        gap: 5px;
-      }
-      .content-navbar li { margin: 5px 0; }
-    }
-    
-    /* Mensagem de sucesso */
-    .success-message {
-      display: none;
-      background-color: #dff0d8;
-      color: #3c763d;
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      text-align: center;
-      border-left: 4px solid #5cb85c;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      animation: slideDown 0.5s ease;
-    }
-    
-    @keyframes slideDown {
-      from { opacity: 0; transform: translateY(-20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    /* Campos extras */
-    #extra-motivo {
-      display: none;
-      margin-bottom: 20px;
-      padding: 20px;
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      border-left: 4px solid #78d14f;
-      animation: fadeIn 0.3s;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    }
-    
-    .form-section {
-      margin-bottom: 30px;
-    }
-    
-    .form-section h3 {
-      margin-bottom: 20px;
-      padding-bottom: 10px;
-      border-bottom: 2px solid #e0e0e0;
-      color: #2c3e50;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-    }
-    
-    .form-section h3 i {
-      margin-right: 10px;
-      color: #78d14f;
-    }
-    
-    /* Estilo para campos obrigatórios */
-    .required::after {
-      content: "*";
-      color: #e74c3c;
-      margin-left: 4px;
-    }
-    
-    /* Tooltip para campos */
-    .tooltip {
-      position: relative;
-      display: inline-block;
-      margin-left: 5px;
-      color: #78d14f;
-      cursor: help;
-    }
-    
-    .tooltip .tooltiptext {
-      visibility: hidden;
-      width: 200px;
-      background-color: #555;
-      color: #fff;
-      text-align: center;
-      border-radius: 6px;
-      padding: 8px;
-      position: absolute;
-      z-index: 1;
-      bottom: 125%;
-      left: 50%;
-      margin-left: -100px;
-      opacity: 0;
-      transition: opacity 0.3s;
-      font-size: 0.9em;
-      font-weight: normal;
-    }
-    
-    .tooltip:hover .tooltiptext {
-      visibility: visible;
-      opacity: 1;
-    }
-    
-    /* Sistema de Notificação */
-    .notification-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      background-color: rgba(0, 0, 0, 0.5);
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s, visibility 0.3s;
-    }
-    
-    .notification-container.show {
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    .notification {
-      background-color: white;
-      border-radius: 10px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-      width: 90%;
-      max-width: 500px;
-      padding: 0;
-      overflow: hidden;
-      transform: translateY(20px);
-      opacity: 0;
-      transition: transform 0.4s, opacity 0.4s;
-    }
-    
-    .notification-container.show .notification {
-      transform: translateY(0);
-      opacity: 1;
-    }
-    
-    .notification-header {
-      color: white;
-      padding: 15px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    
-    .notification-header.ABERTO {
-      background-color: #2ecc71;
-    }
-    
-    .notification-header.FECHADO {
-      background-color: #e74c3c;
-    }
-    
-    .notification-header.ALMOCO {
-      background-color: #f39c12;
-    }
-    
-    .notification-header.MANUTENCAO {
-      background-color: #3498db;
-    }
-    
-    .notification-header h3 {
-      margin: 0;
-      font-size: 1.2em;
-      display: flex;
-      align-items: center;
-    }
-    
-    .notification-header h3 i {
-      margin-right: 10px;
-      font-size: 1.2em;
-    }
-    
-    .notification-close {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 1.5em;
-      cursor: pointer;
-      padding: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      transition: background-color 0.2s;
-    }
-    
-    .notification-close:hover {
-      background-color: rgba(255, 255, 255, 0.2);
-    }
-    
-    .notification-body {
-      padding: 20px;
-      color: #333;
-    }
-    
-    .notification-body p {
-      margin: 0 0 15px 0;
-      font-size: 1.1em;
-      line-height: 1.5;
-    }
-    
-    .notification-footer {
-      padding: 15px 20px;
-      background-color: #f5f5f5;
-      text-align: right;
-      border-top: 1px solid #e0e0e0;
-    }
-    
-    .notification-btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background-color 0.2s;
-      color: white;
-    }
-    
-    .notification-btn.ABERTO {
-      background-color: #2ecc71;
-    }
-    
-    .notification-btn.ABERTO:hover {
-      background-color: #27ae60;
-    }
-    
-    .notification-btn.FECHADO {
-      background-color: #e74c3c;
-    }
-    
-    .notification-btn.FECHADO:hover {
-      background-color: #c0392b;
-    }
-    
-    .notification-btn.ALMOCO {
-      background-color: #f39c12;
-    }
-    
-    .notification-btn.ALMOCO:hover {
-      background-color: #e67e22;
-    }
-    
-    .notification-btn.MANUTENCAO {
-      background-color: #3498db;
-    }
-    
-    .notification-btn.MANUTENCAO:hover {
-      background-color: #2980b9;
-    }
-    
-    /* Status do laboratório */
-    .lab-status {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      background-color: rgba(255, 255, 255, 0.9);
-      padding: 10px 15px;
-      border-radius: 30px;
-      display: flex;
-      align-items: center;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-      z-index: 900;
-      transition: all 0.3s;
-    }
-    
-    .status-indicator {
-      width: 12px;
-      height: 12px;
-      border-radius: 50%;
-      margin-right: 8px;
-      transition: background-color 0.3s;
-    }
-    
-    .status-indicator.ABERTO {
-      background-color: #2ecc71;
-    }
-    
-    .status-indicator.FECHADO {
-      background-color: #e74c3c;
-    }
-    
-    .status-indicator.ALMOCO {
-      background-color: #f39c12;
-    }
-    
-    .status-indicator.MANUTENCAO {
-      background-color: #3498db;
-    }
-    
-    .lab-status span {
-      font-size: 0.9em;
-      font-weight: 600;
-      color: #333;
-    }
-    
-    /* Animação de pulso para o indicador */
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.1); }
-      100% { transform: scale(1); }
-    }
-    
-    .status-indicator {
-      animation: pulse 2s infinite;
-    }
-    
-    /* Estilo para o campo de tipo de instituição */
-    .tipo-instituicao {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-    
-    .tipo-instituicao label {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      margin-bottom: 0;
-    }
-    
-    .tipo-instituicao input[type="radio"] {
-      width: auto;
-      margin-right: 8px;
-      margin-bottom: 0;
-      cursor: pointer;
-    }
-    
-    /* Estilo para o campo de número de alunos */
-    .range-container {
-      position: relative;
-      margin-bottom: 30px;
-    }
-    
-    .range-container input[type="range"] {
-      width: 100%;
-      margin-bottom: 10px;
-      -webkit-appearance: none;
-      height: 8px;
-      border-radius: 5px;
-      background: #ddd;
-      outline: none;
-      padding: 0;
-      margin: 10px 0;
-    }
-    
-    .range-container input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #78d14f;
-      cursor: pointer;
-      transition: all 0.15s ease-in-out;
-    }
-    
-    .range-container input[type="range"]::-webkit-slider-thumb:hover {
-      background: #6bc045;
-      transform: scale(1.2);
-    }
-    
-    .range-container input[type="range"]::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      border: 0;
-      border-radius: 50%;
-      background: #78d14f;
-      cursor: pointer;
-      transition: all 0.15s ease-in-out;
-    }
-    
-    .range-container input[type="range"]::-moz-range-thumb:hover {
-      background: #6bc045;
-      transform: scale(1.2);
-    }
-    
-    .range-container .range-value {
-      display: inline-block;
-      position: relative;
-      width: 60px;
-      color: #fff;
-      line-height: 20px;
-      text-align: center;
-      border-radius: 3px;
-      background: #78d14f;
-      padding: 5px 10px;
-      margin-left: 8px;
-    }
-    
-    .range-container .range-value:after {
-      position: absolute;
-      top: 8px;
-      left: -6px;
-      width: 0;
-      height: 0;
-      border-top: 7px solid transparent;
-      border-right: 7px solid #78d14f;
-      border-bottom: 7px solid transparent;
-      content: '';
-    }
-    
-    .range-container .range-labels {
-      display: flex;
-      justify-content: space-between;
-      padding: 0;
-      margin-top: 5px;
-    }
-    
-    .range-container .range-labels span {
-      font-size: 0.8em;
-      color: #666;
-    }
+        linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.5),rgba(0,0,0,0.7)),
+        url('https://lh3.googleusercontent.com/p/AF1QipPazkvEhFazil1umg40zjbFvha7R9gnRqIWCAAT=s1360-w1360-h1020-rw')
+        center/cover fixed}
+    .page-title{color:#fff;font-size:2.5em;text-shadow:2px2px4px rgba(0,0,0,0.5);margin-bottom:30px}
+    form{background:rgba(255,255,255,0.97);color:#2c3e50;padding:30px;border-radius:12px;
+      width:100%;max-width:650px;box-shadow:0 8px 25px rgba(0,0,0,0.3)}
+    label{display:block;margin-bottom:8px;font-weight:600;color:#34495e}
+    input,select{width:100%;padding:12px 15px;margin-bottom:20px;border:1px solid #ddd;
+      border-radius:6px;font-size:1em;background:#f9f9f9;transition:all .3s}
+    input:focus,select:focus{outline:none;border-color:#78d14f;
+      box-shadow:0 0 0 3px rgba(120,209,79,.2);background:#fff}
+    select{appearance:none;
+      background:url("data:image/svg+xml;utf8,<svg fill='%2378d14f' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>")
+      no-repeat right 10px center}
+    .extra-section{display:none;margin-bottom:20px;padding:20px;background:#f9f9f9;
+      border-radius:8px;border-left:4px solid #78d14f}
+    .btn{display:inline-block;width:100%;padding:14px;background:#78d14f;color:#fff;
+      text-align:center;border:none;border-radius:6px;font-weight:600;transition:all .3s}
+    .btn:hover{background:#6bc045;transform:translateY(-2px)}
+    .voltar{display:inline-block;margin-top:10px;padding:12px 20px;background:#a7a7a7;
+      color:#fff;text-decoration:none;border-radius:6px}
+    .voltar:hover{background:#8c8c8c}
+    .content-navbar{position:fixed;bottom:-100px;left:0;width:100%;
+      background:rgba(167,167,167,.95);padding:15px 0;text-align:center;transition:bottom .3s;z-index:100}
+    body.scrolled .content-navbar{bottom:0}
+    .content-navbar ul{display:inline-flex;list-style:none;gap:10px}
+    .content-navbar a{color:#fff;text-decoration:none;padding:10px 15px;
+      border-radius:5px;transition:all .3s;display:flex;align-items:center}
+    .content-navbar a:hover{background:#78d14f;transform:translateY(-2px)}
+    footer{background:#78d14f;color:#fff;text-align:center;padding:20px;margin-top:auto}
   </style>
 </head>
 <body>
-  <!-- Status do laboratório -->
-  <div class="lab-status">
-    <div class="status-indicator {{ estado }}" id="status-indicator"></div>
-    <span id="status-text">Laboratório {{ estado }}</span>
-  </div>
-
-  <!-- Sistema de Notificação -->
-  <div class="notification-container {% if estado != 'ABERTO' %}show{% endif %}" id="notification-container">
-    <div class="notification">
-      <div class="notification-header {{ estado }}">
-        <h3>
-          {% if estado == 'ABERTO' %}
-            <i class="fas fa-door-open"></i> Laboratório Aberto
-          {% elif estado == 'FECHADO' %}
-            <i class="fas fa-door-closed"></i> Laboratório Fechado
-          {% elif estado == 'ALMOCO' %}
-            <i class="fas fa-utensils"></i> Laboratório em Horário de Almoço
-          {% elif estado == 'MANUTENCAO' %}
-            <i class="fas fa-tools"></i> Laboratório em Manutenção
-          {% else %}
-            <i class="fas fa-exclamation-triangle"></i> Acesso Pendente
-          {% endif %}
-        </h3>
-        <button class="notification-close" id="notification-close">&times;</button>
-      </div>
-      <div class="notification-body">
-        {% if estado == 'ABERTO' %}
-          <p>O laboratório está aberto e pronto para receber visitantes!</p>
-          <p>Você pode registrar sua visita normalmente.</p>
-        {% elif estado == 'FECHADO' %}
-          <p>O laboratório está fechado no momento. Seu registro foi recebido, mas você precisará aguardar a liberação do bolsista para acessar o laboratório.</p>
-          <p>Por favor, aguarde na recepção até ser chamado.</p>
-        {% elif estado == 'ALMOCO' %}
-          <p>O laboratório está em horário de almoço. Seu registro foi recebido, mas você precisará aguardar o retorno do bolsista.</p>
-          <p>O atendimento será retomado em breve.</p>
-        {% elif estado == 'MANUTENCAO' %}
-          <p>O laboratório está em manutenção no momento. Seu registro foi recebido, mas o acesso está temporariamente indisponível.</p>
-          <p>Por favor, verifique mais tarde ou entre em contato com a administração.</p>
-        {% else %}
-          <p>O laboratório não está disponível no momento. Seu registro foi recebido, mas você precisará aguardar a liberação do bolsista para acessar o laboratório.</p>
-          <p>Por favor, aguarde na recepção até ser chamado.</p>
-        {% endif %}
-      </div>
-      <div class="notification-footer">
-        <button class="notification-btn {{ estado }}" id="notification-ok">Entendi</button>
-      </div>
-    </div>
-  </div>
-
   <main>
     <h1 class="page-title">Registro de Visitante</h1>
-    
-    <div class="success-message" id="success-message">
-      <i class="fas fa-check-circle"></i> Registro realizado com sucesso!
-    </div>
-    
-    <form action="{{ url_for('visitante') }}" method="post" autocomplete="off" id="visitor-form">
-      <div class="form-section">
-        <h3><i class="fas fa-user"></i> Informações do Visitante</h3>
-        <label for="nome" class="required">Nome:</label>
-        <input type="text" id="nome" name="nome" required placeholder="Digite seu nome completo">
 
-        <label for="matricula">Matrícula ou CPF (opcional):</label>
-        <input type="text" id="matricula" name="matricula" placeholder="Apenas números">
+    <form id="visitor-form" action="{{ url_for('visitante') }}" method="post" autocomplete="off">
+      <label for="nome">Nome <span style="color:#e74c3c">*</span></label>
+      <input type="text" id="nome" name="nome" required placeholder="Seu nome completo">
+
+      <label for="matricula">Matrícula ou CPF (opcional)</label>
+      <input type="text" id="matricula" name="matricula" placeholder="Apenas números">
+
+      <label for="motivo">O que veio fazer aqui <span style="color:#e74c3c">*</span></label>
+      <select id="motivo" name="motivo" required>
+        <option value="" disabled selected>Selecione...</option>
+        <option value="Consulta">Consulta</option>
+        <option value="Manutenção">Manutenção</option>
+        <option value="Emprestimo">Empréstimo</option>
+        <option value="Visita Técnica">Visita Técnica</option>
+        <option value="Outro">Outro</option>
+      </select>
+
+      <!-- Empréstimo -->
+      <div id="extra-emprestimo" class="extra-section">
+        <label for="telefone">Telefone para contato</label>
+        <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000">
       </div>
-      
-      <div class="form-section">
-        <h3><i class="fas fa-clipboard-list"></i> Detalhes da Visita</h3>
-        <label for="motivo" class="required">O que veio fazer aqui:</label>
-        <select name="motivo" id="motivo" required>
-          <option value="" disabled selected>Selecione uma opção</option>
-          <option value="Consulta">Consulta</option>
-          <option value="Manutenção">Manutenção</option>
-          <option value="Emprestimo">Empréstimo</option>
-          <option value="Visita Técnica">Visita Técnica</option>
-          <option value="Outro">Outro</option>
-        </select>
-        
-        <!-- Campos para Visita Técnica -->
-        <div id="extra-visita-tecnica">
-          <h4><i class="fas fa-school"></i> Detalhes da Visita Técnica</h4>
-          
-          <label class="required">Tipo de Instituição:</label>
-          <div class="tipo-instituicao">
-            <label>
-              <input type="radio" name="tipo_instituicao" value="Escola" required> Escola
-            </label>
-            <label>
-              <input type="radio" name="tipo_instituicao" value="Universidade"> Universidade
-            </label>
-            <label>
-              <input type="radio" name="tipo_instituicao" value="Empresa"> Empresa
-            </label>
-            <label>
-              <input type="radio" name="tipo_instituicao" value="Outro"> Outro
-            </label>
-          </div>
-          
-          <label for="nome-instituicao" class="required">Nome da Instituição:</label>
-          <input type="text" id="nome-instituicao" name="nome_instituicao" placeholder="Digite o nome da instituição">
-          
-          <label for="num-visitantes" class="required">Número de Visitantes:</label>
-          <div class="range-container">
-            <div style="display: flex; align-items: center;">
-              <input type="range" id="num-visitantes" name="num_visitantes" min="1" max="50" value="10">
-              <span class="range-value" id="range-value">10</span>
-            </div>
-            <div class="range-labels">
-              <span>1</span>
-              <span>10</span>
-              <span>20</span>
-              <span>30</span>
-              <span>40</span>
-              <span>50</span>
-            </div>
-          </div>
-          
-          <label for="responsavel" class="required">Responsável pelo Grupo:</label>
-          <input type="text" id="responsavel" name="responsavel" placeholder="Nome do responsável pelo grupo">
-          
-          <label for="objetivo-visita" class="required">Objetivo da Visita:</label>
-          <input type="text" id="objetivo-visita" name="objetivo_visita" placeholder="Descreva o objetivo da visita técnica">
+
+      <!-- Visita Técnica -->
+      <div id="extra-visita-tecnica" class="extra-section">
+        <label>Tipo de Instituição</label>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <label><input type="radio" name="tipo_instituicao" value="Escola"> Escola</label>
+          <label><input type="radio" name="tipo_instituicao" value="Universidade"> Universidade</label>
+          <label><input type="radio" name="tipo_instituicao" value="Empresa"> Empresa</label>
+          <label><input type="radio" name="tipo_instituicao" value="Outro"> Outro</label>
         </div>
-        
-        <div id="extra-motivo">
-          <label for="outro-motivo" class="required">Especifique o motivo:</label>
-          <input type="text" id="outro-motivo" name="outro_motivo" placeholder="Descreva o motivo da sua visita">
-        </div>
-        
-        <!-- Telefone para Empréstimo -->
-        <div id="extra-emprestimo">
-          <label for="telefone" class="required">Telefone para contato:</label>
-          <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000">
-        
-          <!-- Árvore de Itens -->
-          <div id="emprestimos-tree">
-            <label>Selecione itens para empréstimo: <span class="tooltip"><i class="fas fa-info-circle"></i><span class="tooltiptext">Marque os itens que deseja emprestar e indique a quantidade</span></span></label>
-            <ul>
-              <li>
-                <span class="toggle">Impressão 3D</span>
-                <ul>
-                  <li>
-                    <input type="checkbox" id="filamento-pla" name="items[]" value="filamento-pla">
-                    <label for="filamento-pla">Filamento PLA</label>
-                    <input type="number" name="qtd_filamento-pla" min="1" max="10" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="filamento-abs" name="items[]" value="filamento-abs">
-                    <label for="filamento-abs">Filamento ABS</label>
-                    <input type="number" name="qtd_filamento-abs" min="1" max="10" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="filamento-petg" name="items[]" value="filamento-petg">
-                    <label for="filamento-petg">Filamento PETG</label>
-                    <input type="number" name="qtd_filamento-petg" min="1" max="10" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="filamento-tpu" name="items[]" value="filamento-tpu">
-                    <label for="filamento-tpu">Filamento TPU Flexível</label>
-                    <input type="number" name="qtd_filamento-tpu" min="1" max="5" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="pecas" name="items[]" value="pecas">
-                    <label for="pecas">Peças impressas</label>
-                    <input type="number" name="qtd_pecas" min="1" max="20" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="suporte-impressao" name="items[]" value="suporte-impressao">
-                    <label for="suporte-impressao">Suporte para impressão</label>
-                    <input type="number" name="qtd_suporte-impressao" min="1" max="5" value="1">
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <span class="toggle">Eletrônica</span>
-                <ul>
-                  <li>
-                    <span class="toggle">Kits Arduino</span>
-                    <ul>
-                      <li>
-                        <input type="checkbox" id="uno" name="items[]" value="uno">
-                        <label for="uno">Arduino Uno</label>
-                        <input type="number" name="qtd_uno" min="1" max="5" value="1">
-                      </li>
-                      <li>
-                        <input type="checkbox" id="nano" name="items[]" value="nano">
-                        <label for="nano">Arduino Nano</label>
-                        <input type="number" name="qtd_nano" min="1" max="5" value="1">
-                      </li>
-                      <li>
-                        <input type="checkbox" id="mega" name="items[]" value="mega">
-                        <label for="mega">Arduino Mega</label>
-                        <input type="number" name="qtd_mega" min="1" max="5" value="1">
-                      </li>
-                      <li>
-                        <input type="checkbox" id="esp32" name="items[]" value="esp32">
-                        <label for="esp32">ESP32</label>
-                        <input type="number" name="qtd_esp32" min="1" max="5" value="1">
-                      </li>
-                      <li>
-                        <input type="checkbox" id="esp8266" name="items[]" value="esp8266">
-                        <label for="esp8266">ESP8266 NodeMCU</label>
-                        <input type="number" name="qtd_esp8266" min="1" max="5" value="1">
-                      </li>
-                    </ul>
-                  </li>
-                  <li>
-                    <span class="toggle">Sensores</span>
-                    <ul>
-                      <li>
-                        <input type="checkbox" id="sensor-temp" name="items[]" value="sensor-temp">
-                        <label for="sensor-temp">Sensor de Temperatura</label>
-                        <input type="number" name="qtd_sensor-temp" min="1" max="10" value="1">
-                      </li>
-                      <li>
-                        <input type="checkbox" id="sensor-umidade" name="items[]" value="sensor-umidade">
-                        <label for="sensor-umidade">Sensor de Umidade</label>
-                        <input type="number" name="qtd_sensor-umidade" min="1" max="10" value="1">
-                      </li>
-                      <li>
-                        <input type="checkbox" id="sensor-movimento" name="items[]" value="sensor-movimento">
-                        <label for="sensor-movimento">Sensor de Movimento PIR</label>
-                        <input type="number" name="qtd_sensor-movimento" min="1" max="10" value="1">
-                      </li>
-                      <li>
-                        <input type="checkbox" id="sensor-ultrassonico" name="items[]" value="sensor-ultrassonico">
-                        <label for="sensor-ultrassonico">Sensor Ultrassônico</label>
-                        <input type="number" name="qtd_sensor-ultrassonico" min="1" max="10" value="1">
-                      </li>
-                    </ul>
-                  </li>
-                  <li>
-                    <input type="checkbox" id="led-kit" name="items[]" value="led-kit">
-                    <label for="led-kit">Kit LEDs e Resistores</label>
-                    <input type="number" name="qtd_led-kit" min="1" max="20" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="protoboard" name="items[]" value="protoboard">
-                    <label for="protoboard">Protoboard</label>
-                    <input type="number" name="qtd_protoboard" min="1" max="10" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="jumpers" name="items[]" value="jumpers">
-                    <label for="jumpers">Kit de Jumpers</label>
-                    <input type="number" name="qtd_jumpers" min="1" max="10" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="display-lcd" name="items[]" value="display-lcd">
-                    <label for="display-lcd">Display LCD 16x2</label>
-                    <input type="number" name="qtd_display-lcd" min="1" max="5" value="1">
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <span class="toggle">Ferramentas</span>
-                <ul>
-                  <li>
-                    <input type="checkbox" id="multimetro" name="items[]" value="multimetro">
-                    <label for="multimetro">Multímetro</label>
-                    <input type="number" name="qtd_multimetro" min="1" max="3" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="ferro-sol" name="items[]" value="ferro-sol">
-                    <label for="ferro-sol">Ferro de Solda</label>
-                    <input type="number" name="qtd_ferro-sol" min="1" max="3" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="alicate" name="items[]" value="alicate">
-                    <label for="alicate">Alicate de Corte</label>
-                    <input type="number" name="qtd_alicate" min="1" max="3" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="chaves-precisao" name="items[]" value="chaves-precisao">
-                    <label for="chaves-precisao">Kit Chaves de Precisão</label>
-                    <input type="number" name="qtd_chaves-precisao" min="1" max="3" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="estacao-solda" name="items[]" value="estacao-solda">
-                    <label for="estacao-solda">Estação de Solda</label>
-                    <input type="number" name="qtd_estacao-solda" min="1" max="2" value="1">
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <span class="toggle">Robótica</span>
-                <ul>
-                  <li>
-                    <input type="checkbox" id="motor-dc" name="items[]" value="motor-dc">
-                    <label for="motor-dc">Motor DC</label>
-                    <input type="number" name="qtd_motor-dc" min="1" max="10" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="servo-motor" name="items[]" value="servo-motor">
-                    <label for="servo-motor">Servo Motor</label>
-                    <input type="number" name="qtd_servo-motor" min="1" max="5" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="motor-passo" name="items[]" value="motor-passo">
-                    <label for="motor-passo">Motor de Passo</label>
-                    <input type="number" name="qtd_motor-passo" min="1" max="5" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="driver-motor" name="items[]" value="driver-motor">
-                    <label for="driver-motor">Driver para Motor</label>
-                    <input type="number" name="qtd_driver-motor" min="1" max="5" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="kit-chassi" name="items[]" value="kit-chassi">
-                    <label for="kit-chassi">Kit Chassi para Robô</label>
-                    <input type="number" name="qtd_kit-chassi" min="1" max="3" value="1">
-                  </li>
-                </ul>
-              </li>
-              <li>
-                <span class="toggle">Materiais de Consumo</span>
-                <ul>
-                  <li>
-                    <input type="checkbox" id="estanho" name="items[]" value="estanho">
-                    <label for="estanho">Rolo de Estanho</label>
-                    <input type="number" name="qtd_estanho" min="1" max="5" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="placa-fenolite" name="items[]" value="placa-fenolite">
-                    <label for="placa-fenolite">Placa de Fenolite</label>
-                    <input type="number" name="qtd_placa-fenolite" min="1" max="5" value="1">
-                  </li>
-                  <li>
-                    <input type="checkbox" id="fita-isolante" name="items[]" value="fita-isolante">
-                    <label for="fita-isolante">Fita Isolante</label>
-                    <input type="number" name="qtd_fita-isolante" min="1" max="5" value="1">
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </div>
-        </div>
-        
-        <label for="observacoes">Observações (opcional):</label>
-        <input type="text" id="observacoes" name="observacoes" placeholder="Informações adicionais">
+        <label for="nome-instituicao">Nome da Instituição</label>
+        <input type="text" id="nome-instituicao" name="nome_instituicao" placeholder="Nome da instituição">
+
+        <label for="num-visitantes">Número de Visitantes</label>
+        <input type="range" id="num-visitantes" name="num_visitantes" min="1" max="50" value="10">
+        <span id="range-value">10</span>
+
+        <label for="responsavel">Responsável pelo Grupo</label>
+        <input type="text" id="responsavel" name="responsavel" placeholder="Nome do responsável">
+
+        <label for="objetivo-visita">Objetivo da Visita</label>
+        <input type="text" id="objetivo-visita" name="objetivo_visita" placeholder="Objetivo da visita">
       </div>
-      
-      <!-- Hora Registro oculto -->
+
+      <!-- Outro -->
+      <div id="extra-motivo" class="extra-section">
+        <label for="outro-motivo">Especifique o motivo</label>
+        <input type="text" id="outro-motivo" name="outro_motivo" placeholder="Descreva o motivo">
+      </div>
+
+      <label for="observacoes">Observações (opcional)</label>
+      <input type="text" id="observacoes" name="observacoes" placeholder="Alguma observação?">
+
       <input type="hidden" name="hora_registro" id="hora_registro">
-      <!-- Status do laboratório oculto -->
-      <input type="hidden" name="lab_status" id="lab_status" value="{{ estado }}">
+      <input type="hidden" name="lab_status" value="{{ estado }}">
 
       <button type="submit" class="btn">
-        <i class="fas fa-check-circle"></i> 
-        {% if estado == 'ABERTO' %}
-          Registrar
-        {% else %}
-          Pré-registrar
-        {% endif %}
+        <i class="fas fa-check-circle"></i>
+        {% if estado=='ABERTO' %}Registrar{% else %}Pré-registrar{% endif %}
       </button>
     </form>
 
-    <a class="btn voltar" href="{{ url_for('index') }}"><i class="fas fa-arrow-left"></i> Voltar</a>
+    <a href="{{ url_for('index') }}" class="voltar"><i class="fas fa-arrow-left"></i> Voltar</a>
   </main>
 
   <nav class="content-navbar">
     <ul>
       <li><a href="https://maker.cnat.ifrn.edu.br/sobre/"><i class="fas fa-info-circle"></i> Sobre</a></li>
       <li><a href="https://maker.cnat.ifrn.edu.br/estrutura/"><i class="fas fa-building"></i> Estrutura</a></li>
-      <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSdsn-f_Bjn8tTH4d9SO943Hu-xeNNuY67R2MOF18LBCWl7-4Q/viewform"><i class="fas fa-calendar-alt"></i> Agendamento</a></li>
+      <li><a href="https://docs.google.com/forms/d/e/..."><i class="fas fa-calendar-alt"></i> Agendamento</a></li>
     </ul>
   </nav>
 
   <footer>&copy; 2025 Lab. Todos os direitos reservados.</footer>
 
   <script>
-    // Elementos DOM
-    const notificationContainer = document.getElementById('notification-container');
-    const notificationClose = document.getElementById('notification-close');
-    const notificationOk = document.getElementById('notification-ok');
-    
-    // Função para esconder notificação
-    function hideNotification() {
-      notificationContainer.classList.remove('show');
-    }
-    
-    // Event Listeners
-    notificationClose.addEventListener('click', hideNotification);
-    notificationOk.addEventListener('click', hideNotification);
-    
-    // Navbar ao rolar
-    window.addEventListener('scroll', () =>
-      document.body.classList.toggle('scrolled', window.scrollY > 100)
-    );
-
-    // Capitaliza nome
-    document.querySelector("form").addEventListener("submit", () => {
-      const inome = document.getElementById("nome");
-      inome.value = inome.value.trim().toLowerCase()
-        .split(" ")
-        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
+    // Preenche hora no submit
+    document.getElementById('visitor-form').addEventListener('submit', function(){
+      document.getElementById('hora_registro').value = new Date().toISOString().slice(0,19).replace('T',' ');
     });
 
-    // Define hora de registro
-    document.querySelector("form").addEventListener("submit", (e) => {
-      const agora = new Date();
-      document.getElementById("hora_registro").value =
-        agora.toISOString().replace("T"," ").slice(0,19);
+    // Mostra e oculta seções extras
+    document.getElementById('motivo').addEventListener('change', function(){
+      const v=this.value;
+      document.querySelectorAll('.extra-section').forEach(s=>s.style.display='none');
+      if(v==='Emprestimo')      document.getElementById('extra-emprestimo').style.display='block';
+      if(v==='Visita Técnica') document.getElementById('extra-visita-tecnica').style.display='block';
+      if(v==='Outro')          document.getElementById('extra-motivo').style.display='block';
     });
 
-    // Mostra extras para empréstimo, visita técnica e outros motivos
-    document.getElementById("motivo").addEventListener("change", function(){
-      const emp = this.value === "Emprestimo";
-      const outro = this.value === "Outro";
-      const visitaTecnica = this.value === "Visita Técnica";
-      
-      document.getElementById("extra-emprestimo").style.display = emp ? "block" : "none";
-      document.getElementById("emprestimos-tree").style.display = emp ? "block" : "none";
-      document.getElementById("extra-motivo").style.display = outro ? "block" : "none";
-      document.getElementById("extra-visita-tecnica").style.display = visitaTecnica ? "block" : "none";
-      
-      // Adiciona validação para campos extras
-      if (emp) {
-        document.getElementById("telefone").setAttribute("required", "");
-      } else {
-        document.getElementById("telefone").removeAttribute("required");
-      }
-      
-      if (outro) {
-        document.getElementById("outro-motivo").setAttribute("required", "");
-      } else {
-        document.getElementById("outro-motivo").removeAttribute("required");
-      }
-      
-      if (visitaTecnica) {
-        document.getElementById("nome-instituicao").setAttribute("required", "");
-        document.getElementById("responsavel").setAttribute("required", "");
-        document.getElementById("objetivo-visita").setAttribute("required", "");
-      } else {
-        document.getElementById("nome-instituicao").removeAttribute("required");
-        document.getElementById("responsavel").removeAttribute("required");
-        document.getElementById("objetivo-visita").removeAttribute("required");
-      }
+    // Máscara de telefone
+    document.getElementById('telefone').addEventListener('input', e=>{
+      let v=e.target.value.replace(/\D/g,'').slice(0,11);
+      if(v.length>6) v=`(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
+      else if(v.length>2) v=`(${v.slice(0,2)}) ${v.slice(2)}`;
+      e.target.value=v;
     });
 
-    // Toggle ramificações
-    function toggleSub(el) {
-      const li = el.parentElement;
-      li.classList.toggle('c-open');
-      el.classList.toggle('open');
-    }
-    document.querySelectorAll('#emprestimos-tree .toggle').forEach(el => {
-      el.addEventListener('click', () => toggleSub(el));
+    // Atualiza contador do range
+    document.getElementById('num-visitantes').addEventListener('input', function(){
+      document.getElementById('range-value').textContent=this.value;
     });
 
-    // Exibe campo número ao marcar checkbox
-    document.querySelectorAll('#emprestimos-tree input[type="checkbox"]').forEach(cb => {
-      cb.addEventListener('change', () => {
-        const num = cb.parentElement.querySelector('input[type="number"]');
-        if (num) num.style.display = cb.checked ? 'inline-block' : 'none';
-      });
-    });
-    
-    // Máscara para telefone
-    const telefoneInput = document.getElementById('telefone');
-    
-    telefoneInput.addEventListener('input', function(e) {
-      let value = e.target.value.replace(/\D/g, '');
-      if (value.length > 11) value = value.slice(0, 11);
-      
-      if (value.length > 2 && value.length <= 6) {
-        value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
-      } else if (value.length > 6) {
-        value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7)}`;
-      }
-      
-      e.target.value = value;
-    });
-    
-    // Atualizar valor do range para número de visitantes
-    const rangeInput = document.getElementById('num-visitantes');
-    const rangeValue = document.getElementById('range-value');
-    
-    rangeInput.addEventListener('input', function() {
-      rangeValue.textContent = this.value;
-    });
-    
-    // Validação do formulário
-    document.getElementById('visitor-form').addEventListener('submit', function(e) {
-      // Validação para empréstimo - verificar se pelo menos um item foi selecionado
-      if (document.getElementById('motivo').value === 'Emprestimo') {
-        const checkboxes = document.querySelectorAll('#emprestimos-tree input[type="checkbox"]:checked');
-        if (checkboxes.length === 0) {
-          e.preventDefault();
-          alert('Por favor, selecione pelo menos um item para empréstimo.');
-          return;
-        }
-      }
-      
-      // Validação para visita técnica
-      if (document.getElementById('motivo').value === 'Visita Técnica') {
-        const tipoInstituicao = document.querySelector('input[name="tipo_instituicao"]:checked');
-        if (!tipoInstituicao) {
-          e.preventDefault();
-          alert('Por favor, selecione o tipo de instituição.');
-          return;
-        }
-      }
-    });
-    
-    // Fechar automaticamente a notificação após 8 segundos
-    setTimeout(() => {
-      if (notificationContainer.classList.contains('show')) {
-        hideNotification();
-      }
-    }, 8000);
+    // Exibe navbar ao rolar
+    window.addEventListener('scroll',()=>document.body.classList.toggle('scrolled',window.scrollY>100));
   </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'938a8835f442f1b1',t:'MTc0NjA1MjczNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
