@@ -43,7 +43,7 @@ PONTOS_CSV         = 'pontos.csv'
 ESTADO_LAB_TXT     = 'estado_lab.txt'
 
 # ===== Google Sheets Web App URL =====
-SHEETS_WEBAPP_URL  = 'https://script.google.com/macros/s/AKfycbwXd3B25eg-DXrem3KZ0Yel3HavuHlS8X5gXAgtCdl6DklQiu2fS-R6W2YQaeF2Jjix/exec'
+SHEETS_WEBAPP_URL  = 'https://script.google.com/macros/s/AKfycbxkilY8N8eXN2JbYO2SmmNYzpe54esVMOa8AVKIgMu8RODoYaCVuSYlIWMyADTUxjt5/exec'
 
 # ===== Senha de acesso ao Admin =====
 ADMIN_PASSWORD = 'maker22'
@@ -58,7 +58,7 @@ if not os.path.exists(PONTOS_CSV):
         csv.writer(f).writerow(['Nome','ID','Data','Entrada','Saída','Duração(min)'])
 
 # ===== Helper: pulso rápido no relé =====
-def abrir_porta(pulse_ms: int = 100):
+def abrir_porta(pulse_ms: int = 1000):
     """
     Liga o DOOR_PIN por pulse_ms milissegundos em background.
     """
@@ -146,6 +146,7 @@ def visitante():
             flash("Laboratório não está aberto para entrada.", "danger")
             return render_template('visitante.html', estado=estado)
 
+        # Campos fixos
         nome      = request.form['nome']
         matricula = request.form['matricula']
         motivo    = request.form['motivo']
@@ -155,7 +156,7 @@ def visitante():
         with open(VISITAS_CSV,'a',newline='') as f:
             csv.writer(f).writerow([nome, matricula, motivo, ts])
 
-        # 2) aciona a porta em ~100ms
+        # 2) aciona a porta
         acesso = os.path.exists(BOLSISTAS_CSV) and os.path.getsize(BOLSISTAS_CSV)>0
         if acesso:
             abrir_porta(pulse_ms=100)
@@ -163,16 +164,33 @@ def visitante():
         else:
             flash("Registro de visitante realizado, mas porta não aberta.", "info")
 
-        # 3) envia ao Sheets em background
-        enviar_para_sheets({
+        # 3) monta parâmetros para o Sheets, incluindo extras
+        params = {
             'nome':     nome,
             'id':       matricula,
             'motivo':   motivo,
             'acao':     'VISITA',
             'datahora': ts
-        })
+        }
 
-        # 4) responde rápido ao cliente
+        # Campos adicionais de Empréstimo
+        if motivo == "Empréstimo":
+            telefone = request.form.get('telefone','').strip()
+            params['telefone'] = telefone
+
+        # Campos adicionais de Visita Técnica
+        if motivo == "Visita Técnica":
+            params.update({
+                'tipoInstituicao':  request.form.get('tipo_instituicao','').strip(),
+                'nomeInstituicao':  request.form.get('nome_instituicao','').strip(),
+                'numeroVisitantes': request.form.get('num_visitantes','').strip(),
+                'objetivoVisita':   request.form.get('objetivo_visita','').strip()
+            })
+
+        # 4) envia ao Sheets em background
+        enviar_para_sheets(params)
+
+        # 5) responde rápido ao cliente
         return render_template('visitante_success.html',
                                nome=nome, estado=estado, acesso=acesso)
     return render_template('visitante.html', estado=estado)
