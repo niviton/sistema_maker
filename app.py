@@ -27,8 +27,7 @@ def inject_is_admin():
 
 # ===== Auto-detecta porta Serial do ESP32 =====
 def auto_detect_serial():
-    ports = list_ports.comports()
-    for p in ports:
+    for p in list_ports.comports():
         desc = p.description.lower()
         if 'usb' in desc or 'cp210' in desc or 'ftdi' in desc:
             return p.device
@@ -47,7 +46,7 @@ except Exception as e:
 # ===== GPIO simulado (Windows) ou real no Raspberry =====
 if sys.platform.startswith("win"):
     class GPIO:
-        BCM = OUT = IN = HIGH = LOW = None
+        BCM = OUT = HIGH = LOW = None
         @staticmethod
         def setmode(mode): pass
         @staticmethod
@@ -88,7 +87,7 @@ if not os.path.exists(VISITAS_CSV):
 if not os.path.exists(BOLSISTAS_CSV):
     open(BOLSISTAS_CSV, 'w').close()
 
-# ===== Funções de controle =====
+# ===== Função para controlar o LED no ESP32 =====
 def control_led(turn_on: bool):
     if ser and ser.is_open:
         cmd = b'LED_ON\n' if turn_on else b'LED_OFF\n'
@@ -100,9 +99,8 @@ def control_led(turn_on: bool):
     else:
         app.logger.warning("Serial não disponível para controlar LED")
 
-
+# ===== Helper: abre porta e pisca LED =====
 def abrir_porta(pulse_ms: int = 100):
-    # Tenta acionar relé via ESP32
     if ser and ser.is_open:
         try:
             ser.write(b'OPEN\n')
@@ -110,14 +108,12 @@ def abrir_porta(pulse_ms: int = 100):
         except Exception as e:
             app.logger.error(f"Erro ao escrever na serial para relé: {e}")
     else:
-        # Fallback para GPIO local
         def _pulse_gpio():
             GPIO.output(DOOR_PIN, GPIO.HIGH)
             time.sleep(pulse_ms / 1000.0)
             GPIO.output(DOOR_PIN, GPIO.LOW)
         threading.Thread(target=_pulse_gpio, daemon=True).start()
         app.logger.info("Fallback GPIO pulse aplicado")
-    # Pisca LED
     control_led(True)
     threading.Timer(pulse_ms/1000.0, lambda: control_led(False)).start()
 
@@ -138,7 +134,6 @@ def _send_to_sheets(params):
             app.logger.info(f"Sheets respondeu: {resp.read().decode()}")
     except Exception as e:
         app.logger.error(f"Erro enviando ao Sheets: {e}")
-
 
 def enviar_para_sheets(params):
     threading.Thread(target=_send_to_sheets, args=(params,), daemon=True).start()
@@ -164,7 +159,7 @@ def login():
         flash('Senha incorreta.', 'danger')
     return render_template('login.html')
 
-@app.route('/logout')
+@app.route('/logout', methods=['GET','POST'])
 def logout():
     session.pop('is_admin', None)
     flash('Você saiu do painel de administração.', 'info')
@@ -173,7 +168,7 @@ def logout():
 # ===== Rotas Públicas =====
 @app.route('/')
 def index():
-    return render_template('index.html', estado=get_estado_lab(), is_admin=session.get('is_admin', False))
+    return redirect(url_for('home'))
 
 @app.route('/home')
 def home():
@@ -190,40 +185,20 @@ def visitante():
         if estado != 'ABERTO':
             flash('Laboratório não está aberto para entrada.', 'danger')
             return render_template('visitante.html', estado=estado)
-
         nome      = request.form['nome']
         matricula = request.form['matricula']
         motivo    = request.form['motivo']
         ts        = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-        # 1) grava localmente
         with open(VISITAS_CSV,'a', newline='') as f:
             csv.writer(f).writerow([nome, matricula, motivo, ts])
-
-        # 2) aciona porta e LED
         acesso = os.path.exists(BOLSISTAS_CSV) and os.path.getsize(BOLSISTAS_CSV)>0
         if acesso:
             abrir_porta(100)
             flash('Registro de visitante realizado, relé e LED acionados!', 'success')
         else:
             flash('Registro de visitante realizado, mas porta não aberta.', 'info')
-
-        # 3) Monta parâmetros extras para empréstimo ou visita técnica
         params = {'nome': nome, 'id': matricula, 'motivo': motivo, 'acao': 'VISITA', 'datahora': ts}
-        if motivo == 'Empréstimo':
-            params['telefone'] = request.form.get('telefone','').strip()
-        if motivo == 'Visita Técnica':
-            params.update({
-                'tipoInstituicao':  request.form.get('tipo_instituicao','').strip(),
-                'nomeInstituicao':  request.form.get('nome_instituicao','').strip(),
-                'numeroVisitantes': request.form.get('num_visitantes','').strip(),
-                'objetivoVisita':   request.form.get('objetivo_visita','').strip()
-            })
-        
-        # 4) envia ao Sheets em background
         enviar_para_sheets(params)
-
-        # 5) responde rápido ao cliente
         return render_template('visitante_success.html', nome=nome, estado=estado, acesso=acesso)
     return render_template('visitante.html', estado=estado)
 
@@ -242,7 +217,6 @@ def bolsista():
         if not validado:
             flash('Bolsista não cadastrado.', 'danger')
             return render_template('bolsista_fail.html')
-
         abrir_porta(100)
         flash('Bolsista validado. Porta e LED acionados!', 'success')
         return render_template('bolsista_success.html', nome=nome, matricula=matricula, estado=get_estado_lab())
@@ -332,7 +306,7 @@ def atualizar_estado():
         flash(f"Estado do laboratório atualizado para: {novo}", 'info')
     else:
         flash('Nenhum estado fornecido.', 'warning')
-    return redirect(url_for('index'))
+    return redirect(url_for('home'))
 
 # ===== Executar =====
 if __name__ == '__main__':

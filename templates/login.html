@@ -1,57 +1,32 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Login Admin – CNATMaker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body, html { height:100%; font-family:Arial,sans-serif; background:#f0f0f0; }
-    .login-container {
-      display:flex; justify-content:center; align-items:center;
-      height:100%;
-    }
-    .login-box {
-      background:white; padding:24px; border-radius:8px;
-      box-shadow:0 4px 12px rgba(0,0,0,0.1); width:320px;
-    }
-    .login-box h2 {
-      margin-bottom:16px; color:#333; text-align:center;
-    }
-    .login-box form {
-      display:flex; flex-direction:column;
-    }
-    .login-box input {
-      padding:12px; margin-bottom:16px;
-      border:1px solid #ccc; border-radius:4px;
-      font-size:1rem;
-    }
-    .login-box button {
-      padding:12px; background:#28a745; color:white;
-      border:none; border-radius:4px;
-      font-size:1rem; font-weight:bold;
-      cursor:pointer; transition:background .2s;
-    }
-    .login-box button:hover {
-      background:#218838;
-    }
-    .flash { margin-bottom:12px; font-weight:bold; color:#d9534f; text-align:center; }
-  </style>
+    <meta charset="UTF-8">
+    <title>Login Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-  <div class="login-container">
-    <div class="login-box">
-      <h2>Administração</h2>
-      {% with msgs = get_flashed_messages(with_categories=false) %}
-        {% for msg in msgs %}
-          <div class="flash">{{ msg }}</div>
-        {% endfor %}
-      {% endwith %}
-      <form method="post">
-        <input type="password" name="senha" placeholder="Senha de administrador" required>
+    <h1>Login do Administrador</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul class="flashes">
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" action="{{ url_for('login') }}">
+        <label for="senha">Senha:</label>
+        <input type="password" id="senha" name="senha" required><br><br>
         <button type="submit">Entrar</button>
-      </form>
-    </div>
-  </div>
+    </form>
+
+    <br>
+    <form method="get" action="{{ url_for('home') }}">
+        <button type="submit">Voltar</button>
+    </form>
 </body>
 </html>
