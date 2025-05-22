@@ -17,6 +17,12 @@ print("Portas disponíveis:")
 for p in ports:
     print(f"  {p.device} — {p.description}")
 
+# ===== Detect available serial ports and auto-detect ESP32 =====
+ports = list_ports.comports()
+print("Portas disponíveis:")
+for p in ports:
+    print(f"  {p.device} — {p.description}")
+
 # ===== Configurações Básicas =====
 app = Flask(__name__)
 app.secret_key = 'super_secret_key'
@@ -27,14 +33,16 @@ def inject_is_admin():
 
 # ===== Auto-detecta porta Serial do ESP32 =====
 def auto_detect_serial():
-    ports = list_ports.comports()
-    for p in ports:
+
+    for p in list_ports.comports():
         desc = p.description.lower()
         if 'usb' in desc or 'cp210' in desc or 'ftdi' in desc:
             return p.device
     return None
 
-SERIAL_PORT = auto_detect_serial() or 'COM3'
+
+SERIAL_PORT = auto_detect_serial() or ('COM3' if sys.platform.startswith("win") else '/dev/ttyUSB0')
+
 BAUD_RATE = 115200
 try:
     ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
@@ -84,9 +92,10 @@ if not os.path.exists(PONTOS_CSV):
     with open(PONTOS_CSV, 'w', newline='') as f:
         csv.writer(f).writerow(['Nome','ID','Data','Entrada','Saída','Duração(min)'])
 if not os.path.exists(VISITAS_CSV):
-    open(VISITAS_CSV,'w').close()
+    open(VISITAS_CSV, 'w').close()
 if not os.path.exists(BOLSISTAS_CSV):
-    open(BOLSISTAS_CSV,'w').close()
+    open(BOLSISTAS_CSV, 'w').close()
+
 
 # ===== Função para controlar o LED no ESP32 =====
 def control_led(turn_on: bool):
@@ -160,7 +169,7 @@ def login():
         flash('Senha incorreta.', 'danger')
     return render_template('login.html')
 
-@app.route('/logout')
+@app.route('/logout', methods=['GET','POST'])
 def logout():
     session.pop('is_admin', None)
     flash('Você saiu do painel de administração.', 'info')
@@ -169,7 +178,7 @@ def logout():
 # ===== Rotas Públicas =====
 @app.route('/')
 def index():
-    return render_template('index.html', estado=get_estado_lab(), is_admin=session.get('is_admin', False))
+    return redirect(url_for('home'))
 
 @app.route('/home')
 def home():
@@ -190,18 +199,17 @@ def visitante():
         matricula = request.form['matricula']
         motivo    = request.form['motivo']
         ts        = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        # 1) grava localmente
-        with open(VISITAS_CSV,'a',newline='') as f:
+        with open(VISITAS_CSV,'a', newline='') as f:
             csv.writer(f).writerow([nome, matricula, motivo, ts])
-        # 2) aciona porta e LED
+
         acesso = os.path.exists(BOLSISTAS_CSV) and os.path.getsize(BOLSISTAS_CSV)>0
         if acesso:
             abrir_porta(100)
             flash('Registro de visitante realizado, relé e LED acionados!', 'success')
         else:
             flash('Registro de visitante realizado, mas porta não aberta.', 'info')
-        # 3) envia ao Sheets
-        enviar_para_sheets({'nome':nome,'id':matricula,'motivo':motivo,'acao':'VISITA','datahora':ts})
+        params = {'nome': nome, 'id': matricula, 'motivo': motivo, 'acao': 'VISITA', 'datahora': ts}
+        enviar_para_sheets(params)
         return render_template('visitante_success.html', nome=nome, estado=estado, acesso=acesso)
     return render_template('visitante.html', estado=estado)
 
@@ -233,7 +241,8 @@ def marcar_ponto():
     now       = datetime.now()
     date_str  = now.strftime('%Y-%m-%d')
     time_str  = now.strftime('%H:%M:%S')
-    rows = list(csv.reader(open(PONTOS_CSV,'r',newline='')))
+
+    rows = list(csv.reader(open(PONTOS_CSV,'r', newline='')))
     if acao == 'entrada':
         rows.append([nome, matricula, date_str, time_str, '', ''])
         flash(f'Ponto de Entrada: {date_str}, {time_str}', 'success')
@@ -251,9 +260,11 @@ def marcar_ponto():
                 break
         if not updated:
             flash('Nenhuma entrada pendente encontrada.', 'danger')
-    with open(PONTOS_CSV,'w',newline='') as f:
+            
+    with open(PONTOS_CSV,'w', newline='') as f:
         csv.writer(f).writerows(rows)
-    enviar_para_sheets({'id':matricula,'nome':nome,'acao':acao.upper(),'data':date_str,'hora':time_str})
+    enviar_para_sheets({'id': matricula, 'nome': nome, 'acao': acao.upper(), 'data': date_str, 'hora': time_str})
+
     return render_template('bolsista_success.html', nome=nome, matricula=matricula, estado=get_estado_lab())
 
 @app.route('/led/<action>')
@@ -278,7 +289,7 @@ def admin():
 def cadastrar_bolsista():
     nome = request.form['nome']
     matricula = request.form['matricula']
-    with open(BOLSISTAS_CSV,'a',newline='') as f:
+    with open(BOLSISTAS_CSV,'a', newline='') as f:
         csv.writer(f).writerow([nome, matricula])
     flash('Bolsista cadastrado com sucesso!', 'success')
     return redirect(url_for('admin'))
@@ -290,13 +301,13 @@ def remover_bolsista():
     rows = []
     removido = False
     if os.path.exists(BOLSISTAS_CSV):
-        with open(BOLSISTAS_CSV,'r',newline='') as f:
+        with open(BOLSISTAS_CSV,'r', newline='') as f:
             for row in csv.reader(f):
                 if row and (row[0]!=chave and row[1]!=chave):
                     rows.append(row)
                 else:
                     removido = True
-    with open(BOLSISTAS_CSV,'w',newline='') as f:
+    with open(BOLSISTAS_CSV,'w', newline='') as f:
         csv.writer(f).writerows(rows)
     flash('Bolsista removido!' if removido else 'Bolsista não encontrado.', 'success' if removido else 'danger')
     return redirect(url_for('admin'))
@@ -309,7 +320,9 @@ def atualizar_estado():
         flash(f"Estado do laboratório atualizado para: {novo}", 'info')
     else:
         flash('Nenhum estado fornecido.', 'warning')
-    return redirect(url_for('index'))
+
+    return redirect(url_for('home'))
+
 
 # ===== Executar =====
 if __name__ == '__main__':

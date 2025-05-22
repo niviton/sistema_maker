@@ -2,89 +2,133 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Registro de Visitante - CNATMaker</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>Registro de Visitante – CNatMaker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI','Arial',sans-serif}
-    body{line-height:1.6;background:#f5f5f5;display:flex;flex-direction:column;min-height:100vh}
-    main{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
+    * { margin:0; padding:0; box-sizing:border-box; font-family:'Segoe UI', Arial, sans-serif; }
+    body { background: #f5f5f5; color: #333; min-height:100vh; display:flex; flex-direction:column; }
+    main {
+      flex:1;
+      display:flex; justify-content:center; align-items:center;
       padding:40px 20px;
       background:
-        linear-gradient(rgba(0,0,0,0.7),rgba(0,0,0,0.5),rgba(0,0,0,0.7)),
-        url('https://lh3.googleusercontent.com/p/AF1QipPazkvEhFazil1umg40zjbFvha7R9gnRqIWCAAT=s1360-w1360-h1020-rw')
-        center/cover fixed}
-    .page-title{color:#fff;font-size:2.5em;text-shadow:2px2px4px rgba(0,0,0,0.5);margin-bottom:30px}
-    form{background:rgba(255,255,255,0.97);color:#2c3e50;padding:30px;border-radius:12px;
-      width:100%;max-width:650px;box-shadow:0 8px 25px rgba(0,0,0,0.3)}
-    label{display:block;margin-bottom:8px;font-weight:600;color:#34495e}
-    input,select{width:100%;padding:12px 15px;margin-bottom:20px;border:1px solid #ddd;
-      border-radius:6px;font-size:1em;background:#f9f9f9;transition:all .3s}
-    input:focus,select:focus{outline:none;border-color:#78d14f;
-      box-shadow:0 0 0 3px rgba(120,209,79,.2);background:#fff}
-    select{appearance:none;
-      background:url("data:image/svg+xml;utf8,<svg fill='%2378d14f' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>")
-      no-repeat right 10px center}
-    .extra-section{display:none;margin-bottom:20px;padding:20px;background:#f9f9f9;
-      border-radius:8px;border-left:4px solid #78d14f}
-    .btn{display:inline-block;width:100%;padding:14px;background:#78d14f;color:#fff;
-      text-align:center;border:none;border-radius:6px;font-weight:600;transition:all .3s}
-    .btn:hover{background:#6bc045;transform:translateY(-2px)}
-    .voltar{display:inline-block;margin-top:10px;padding:12px 20px;background:#a7a7a7;
-      color:#fff;text-decoration:none;border-radius:6px}
-    .voltar:hover{background:#8c8c8c}
-    .content-navbar{position:fixed;bottom:-100px;left:0;width:100%;
-      background:rgba(167,167,167,.95);padding:15px 0;text-align:center;transition:bottom .3s;z-index:100}
-    body.scrolled .content-navbar{bottom:0}
-    .content-navbar ul{display:inline-flex;list-style:none;gap:10px}
-    .content-navbar a{color:#fff;text-decoration:none;padding:10px 15px;
-      border-radius:5px;transition:all .3s;display:flex;align-items:center}
-    .content-navbar a:hover{background:#78d14f;transform:translateY(-2px)}
-    footer{background:#78d14f;color:#fff;text-align:center;padding:20px;margin-top:auto}
+        linear-gradient(rgba(0,0,0,0.6),rgba(0,0,0,0.6)),
+        url('/static/cnat.png') center/cover fixed;
+    }
+    .form-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      width:100%; max-width:600px;
+    }
+    h1 {
+      text-align:center;
+      margin-bottom:20px;
+      color:#78d14f;
+    }
+    .flash-container { margin-bottom:20px; }
+    .flash-container .alert { padding:10px; border-radius:4px; margin-bottom:10px; color:#fff; }
+    .alert-success { background:#28a745; }
+    .alert-danger  { background:#dc3545; }
+    .alert-info    { background:#17a2b8; }
+    label { display:block; margin:12px 0 4px; font-weight:600; }
+    input[type="text"],
+    input[type="tel"],
+    input[type="number"],
+    select {
+      width:100%; padding:10px; border:1px solid #ccc; border-radius:4px;
+      font-size:1rem;
+    }
+    .extra-section { display:none; margin-top:10px; padding:10px; border-left:4px solid #78d14f; background:#f9f9f9; border-radius:4px; }
+    button.btn {
+      margin-top:20px;
+      width:100%;
+      padding:12px;
+      background:#78d14f;
+      color:#fff;
+      border:none;
+      border-radius:4px;
+      font-size:1rem;
+      font-weight:600;
+      cursor:pointer;
+      transition:background .2s ease;
+    }
+    button.btn:hover { background:#5cb85c; }
+    .voltar {
+      display:block;
+      text-align:center;
+      margin-top:15px;
+      color:#555;
+      text-decoration:none;
+    }
+    .voltar:hover { text-decoration:underline; }
+
+    /* navbar inferior */
+    .navbar-bottom {
+      position:fixed; bottom:0; left:0; right:0;
+      background:#ffffff; border-top:1px solid #e0e0e0;
+      box-shadow:0 -2px 4px rgba(0,0,0,0.05);
+      padding:8px 0; text-align:center;
+    }
+    .navbar-bottom a {
+      margin:0 12px; color:#444; text-decoration:none; font-weight:500;
+    }
+    .navbar-bottom a:hover { color:#78d14f; }
+
+    footer {
+      background:#78d14f; color:#fff;
+      text-align:center; padding:12px 0; font-size:0.9em;
+    }
   </style>
 </head>
 <body>
   <main>
-    <h1 class="page-title">Registro de Visitante</h1>
+    <div class="form-container">
+      <h1>Registro de Visitante</h1>
 
-    <form id="visitor-form" action="{{ url_for('visitante') }}" method="post" autocomplete="off">
-      <label for="nome">Nome <span style="color:#e74c3c">*</span></label>
-      <input type="text" id="nome" name="nome" required placeholder="Seu nome completo">
-
-      <label for="matricula">Matrícula ou CPF (opcional)</label>
-      <input type="text" id="matricula" name="matricula" placeholder="Apenas números">
-
-      <label for="motivo">O que veio fazer aqui <span style="color:#e74c3c">*</span></label>
-      <select id="motivo" name="motivo" required>
-        <option value="" disabled selected>Selecione...</option>
-        <option value="Consulta">Consulta</option>
-        <option value="Manutenção">Manutenção</option>
-        <option value="Emprestimo">Empréstimo</option>
-        <option value="Visita Técnica">Visita Técnica</option>
-        <option value="Outro">Outro</option>
-      </select>
-
-      <!-- Empréstimo -->
-      <div id="extra-emprestimo" class="extra-section">
-        <label for="telefone">Telefone para contato</label>
-        <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000">
+      <div class="flash-container">
+        {% with msgs = get_flashed_messages(with_categories=true) %}
+          {% for cat, msg in msgs %}
+            <div class="alert alert-{{ cat }}">{{ msg }}</div>
+          {% endfor %}
+        {% endwith %}
       </div>
 
-      <!-- Visita Técnica -->
-      <div id="extra-visita-tecnica" class="extra-section">
-        <label>Tipo de Instituição</label>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <label><input type="radio" name="tipo_instituicao" value="Escola"> Escola</label>
-          <label><input type="radio" name="tipo_instituicao" value="Universidade"> Universidade</label>
-          <label><input type="radio" name="tipo_instituicao" value="Empresa"> Empresa</label>
-          <label><input type="radio" name="tipo_instituicao" value="Outro"> Outro</label>
-        </div>
-        <label for="nome-instituicao">Nome da Instituição</label>
-        <input type="text" id="nome-instituicao" name="nome_instituicao" placeholder="Nome da instituição">
+      <form id="visitor-form" action="{{ url_for('visitante') }}" method="post" autocomplete="off">
+        <label for="nome">Nome <span style="color:#e74c3c">*</span></label>
+        <input type="text" id="nome" name="nome" required placeholder="Seu nome completo">
 
-        <label for="num-visitantes">Número de Visitantes</label>
-        <input type="range" id="num-visitantes" name="num_visitantes" min="1" max="50" value="10">
-        <span id="range-value">10</span>
+        <label for="matricula">Matrícula ou CPF (opcional)</label>
+        <input type="text" id="matricula" name="matricula" placeholder="Apenas números">
+
+        <label for="motivo">Motivo <span style="color:#e74c3c">*</span></label>
+        <select id="motivo" name="motivo" required>
+          <option value="" disabled selected>Selecione...</option>
+          <option value="Consulta">Consulta</option>
+          <option value="Manutenção">Manutenção</option>
+          <option value="Empréstimo">Empréstimo</option>
+          <option value="Visita Técnica">Visita Técnica</option>
+          <option value="Outro">Outro</option>
+        </select>
+
+        <!-- Empréstimo -->
+        <div id="section-emprestimo" class="extra-section">
+          <label for="telefone">Telefone para contato</label>
+          <input type="tel" id="telefone" name="telefone" placeholder="(00) 00000-0000">
+        </div>
+
+        <!-- Visita Técnica -->
+        <div id="section-visita" class="extra-section">
+          <label for="tipo_instituicao">Tipo de Instituição</label>
+          <input type="text" id="tipo_instituicao" name="tipo_instituicao" placeholder="Escola, Universidade...">
+
+
+          <label for="nome_instituicao">Nome da Instituição</label>
+          <input type="text" id="nome_instituicao" name="nome_instituicao" placeholder="Nome completo">
+
+          <label for="num_visitantes">Número de Visitantes</label>
+          <input type="number" id="num_visitantes" name="num_visitantes" min="1" max="100" value="1">
 
         
 
@@ -93,67 +137,57 @@
         <br>
       </div>
 
-      <!-- Outro -->
-      <div id="extra-motivo" class="extra-section">
-        <label for="outro-motivo">Especifique o motivo</label>
-        <input type="text" id="outro-motivo" name="outro_motivo" placeholder="Descreva o motivo">
-      </div>
 
-      <label for="observacoes">Observações (opcional)</label>
-      <input type="text" id="observacoes" name="observacoes" placeholder="Alguma observação?">
+          <label for="objetivo_visita">Objetivo da Visita</label>
+          <input type="text" id="objetivo_visita" name="objetivo_visita" placeholder="Descreva o objetivo">
+        </div>
 
-      <input type="hidden" name="hora_registro" id="hora_registro">
-      <input type="hidden" name="lab_status" value="{{ estado }}">
+        <!-- Outro -->
+        <div id="section-outro" class="extra-section">
+          <label for="outro_motivo">Especifique o motivo</label>
+          <input type="text" id="outro_motivo" name="outro_motivo" placeholder="Descreva o motivo">
+        </div>
 
-      <button type="submit" class="btn">
-        <i class="fas fa-check-circle"></i>
-        {% if estado=='ABERTO' %}Registrar{% else %}Pré-registrar{% endif %}
-      </button>
-    </form>
+        <label for="observacoes">Observações (opcional)</label>
+        <input type="text" id="observacoes" name="observacoes" placeholder="Alguma observação?">
 
-    <a href="{{ url_for('index') }}" class="voltar"><i class="fas fa-arrow-left"></i> Voltar</a>
+        <button type="submit" class="btn">Registrar Visita</button>
+      </form>
+
+      <a href="{{ url_for('home') }}" class="voltar">&larr; Voltar</a>
+    </div>
   </main>
 
-  <nav class="content-navbar">
-    <ul>
-      <li><a href="https://maker.cnat.ifrn.edu.br/sobre/"><i class="fas fa-info-circle"></i> Sobre</a></li>
-      <li><a href="https://maker.cnat.ifrn.edu.br/estrutura/"><i class="fas fa-building"></i> Estrutura</a></li>
-      <li><a href="https://docs.google.com/forms/d/e/..."><i class="fas fa-calendar-alt"></i> Agendamento</a></li>
-    </ul>
+  <nav class="navbar-bottom">
+    <a href="{{ url_for('index') }}">Início</a>
+    <a href="{{ url_for('home') }}">Home</a>
+    {% if is_admin %}
+      <a href="{{ url_for('admin') }}">Admin</a>
+      <a href="{{ url_for('logout') }}">Sair</a>
+    {% else %}
+      <a href="{{ url_for('login') }}">Admin</a>
+    {% endif %}
   </nav>
 
-  <footer>&copy; 2025 Lab. Todos os direitos reservados.</footer>
+  <footer>
+    &copy; 2025 CNatMaker. Todos os direitos reservados.
+  </footer>
 
   <script>
-    // Preenche hora no submit
-    document.getElementById('visitor-form').addEventListener('submit', function(){
-      document.getElementById('hora_registro').value = new Date().toISOString().slice(0,19).replace('T',' ');
+    const motivoEl = document.getElementById('motivo');
+    motivoEl.addEventListener('change', () => {
+      ['emprestimo','visita','outro'].forEach(sec => {
+        document.getElementById('section-' + sec).style.display = 'none';
+      });
+      const v = motivoEl.value;
+      if (v === 'Empréstimo') {
+        document.getElementById('section-emprestimo').style.display = 'block';
+      } else if (v === 'Visita Técnica') {
+        document.getElementById('section-visita').style.display = 'block';
+      } else if (v === 'Outro') {
+        document.getElementById('section-outro').style.display = 'block';
+      }
     });
-
-    // Mostra e oculta seções extras
-    document.getElementById('motivo').addEventListener('change', function(){
-      const v=this.value;
-      document.querySelectorAll('.extra-section').forEach(s=>s.style.display='none');
-      if(v==='Emprestimo')      document.getElementById('extra-emprestimo').style.display='block';
-      if(v==='Visita Técnica') document.getElementById('extra-visita-tecnica').style.display='block';
-      if(v==='Outro')          document.getElementById('extra-motivo').style.display='block';
-    });
-
-    // Máscara de telefone
-    document.getElementById('telefone').addEventListener('input', e=>{
-      let v=e.target.value.replace(/\D/g,'').slice(0,11);
-      if(v.length>6) v=`(${v.slice(0,2)}) ${v.slice(2,7)}-${v.slice(7)}`;
-      else if(v.length>2) v=`(${v.slice(0,2)}) ${v.slice(2)}`;
-      e.target.value=v;
-    });
-
-    // Atualiza contador do range
-    document.getElementById('num-visitantes').addEventListener('input', function(){
-      document.getElementById('range-value').textContent=this.value;
-    });
-
-    // Exibe navbar ao rolar
-    window.addEventListener('scroll',()=>document.body.classList.toggle('scrolled',window.scrollY>100));
   </script>
 </body>
 </html>
