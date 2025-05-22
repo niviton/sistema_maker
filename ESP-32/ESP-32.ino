@@ -1,5 +1,6 @@
 // serial_relay.ino
 
+
 const int RELAY_PIN = 26;   // seu pino de relé
 const int LED_PIN   = 15;    // GPIO2, LED embutido em muitos módulos DevKit
 
@@ -21,7 +22,9 @@ void loop() {
     if (cmd.equalsIgnoreCase("OPEN")) {
       // Pulso no relé
       digitalWrite(RELAY_PIN, HIGH);
+
       delay(2000);
+
       digitalWrite(RELAY_PIN, LOW);
       Serial.println("RELAY_OPENED");
 

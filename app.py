@@ -10,6 +10,12 @@ from urllib.request import urlopen
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from datetime import datetime
 from functools import wraps
+from serial.tools import list_ports
+
+ports = list_ports.comports()
+print("Portas disponíveis:")
+for p in ports:
+    print(f"  {p.device} — {p.description}")
 
 # ===== Detect available serial ports and auto-detect ESP32 =====
 ports = list_ports.comports()
@@ -27,13 +33,16 @@ def inject_is_admin():
 
 # ===== Auto-detecta porta Serial do ESP32 =====
 def auto_detect_serial():
+
     for p in list_ports.comports():
         desc = p.description.lower()
         if 'usb' in desc or 'cp210' in desc or 'ftdi' in desc:
             return p.device
     return None
 
+
 SERIAL_PORT = auto_detect_serial() or ('COM3' if sys.platform.startswith("win") else '/dev/ttyUSB0')
+
 BAUD_RATE = 115200
 try:
     ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
@@ -86,6 +95,7 @@ if not os.path.exists(VISITAS_CSV):
     open(VISITAS_CSV, 'w').close()
 if not os.path.exists(BOLSISTAS_CSV):
     open(BOLSISTAS_CSV, 'w').close()
+
 
 # ===== Função para controlar o LED no ESP32 =====
 def control_led(turn_on: bool):
@@ -191,6 +201,7 @@ def visitante():
         ts        = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         with open(VISITAS_CSV,'a', newline='') as f:
             csv.writer(f).writerow([nome, matricula, motivo, ts])
+
         acesso = os.path.exists(BOLSISTAS_CSV) and os.path.getsize(BOLSISTAS_CSV)>0
         if acesso:
             abrir_porta(100)
@@ -230,6 +241,7 @@ def marcar_ponto():
     now       = datetime.now()
     date_str  = now.strftime('%Y-%m-%d')
     time_str  = now.strftime('%H:%M:%S')
+
     rows = list(csv.reader(open(PONTOS_CSV,'r', newline='')))
     if acao == 'entrada':
         rows.append([nome, matricula, date_str, time_str, '', ''])
@@ -248,9 +260,11 @@ def marcar_ponto():
                 break
         if not updated:
             flash('Nenhuma entrada pendente encontrada.', 'danger')
+            
     with open(PONTOS_CSV,'w', newline='') as f:
         csv.writer(f).writerows(rows)
     enviar_para_sheets({'id': matricula, 'nome': nome, 'acao': acao.upper(), 'data': date_str, 'hora': time_str})
+
     return render_template('bolsista_success.html', nome=nome, matricula=matricula, estado=get_estado_lab())
 
 @app.route('/led/<action>')
@@ -306,8 +320,11 @@ def atualizar_estado():
         flash(f"Estado do laboratório atualizado para: {novo}", 'info')
     else:
         flash('Nenhum estado fornecido.', 'warning')
+
     return redirect(url_for('home'))
+
 
 # ===== Executar =====
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', use_reloader=False)
+
