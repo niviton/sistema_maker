@@ -164,6 +164,13 @@ def login_required(f):
     return dec
 
 # ===== Rotas =====
+from flask import redirect
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return redirect('/home')
+
+
 @app.route('/login', methods=('GET', 'POST'))
 def login():
     if request.method == 'POST':
