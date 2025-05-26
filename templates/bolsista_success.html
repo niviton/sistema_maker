@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <title>Bolsista Validado – CNATMaker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="30;url={{ url_for('index') }}">
   <style>
     :root {
       --green: #78d14f;
@@ -15,11 +16,9 @@
       --transition: 0.3s ease;
     }
 
-    /* Reset */
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body, html { height: 100%; font-family: 'Arial', sans-serif; }
 
-    /* Fundo + overlay */
     .full-screen {
       position: relative;
       width: 100%; height: 100%;
@@ -32,7 +31,6 @@
       padding: var(--spacing);
     }
 
-    /* Caixa de conteúdo */
     .content-box {
       background: rgba(255,255,255,0.95);
       border-radius: var(--radius);
@@ -53,7 +51,6 @@
       text-align: center;
     }
 
-    /* Flash messages */
     .flash-messages { margin-bottom: var(--spacing); }
     .alert {
       padding: var(--spacing);
@@ -65,7 +62,6 @@
     .alert-danger  { background: #d9534f; }
     .alert-info    { background: #5bc0de; }
 
-    /* Abas */
     .tabs {
       display: grid;
       grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
@@ -94,7 +90,6 @@
       font-size: 1rem;
     }
 
-    /* Botões */
     .btn {
       padding: var(--spacing);
       background: var(--green);
@@ -119,7 +114,6 @@
       background: #aaa;
     }
 
-    /* Responsivo */
     @media(max-width: 480px) {
       .content-box { padding: var(--spacing); }
       .content-box h1 { font-size: 2rem; }
@@ -131,6 +125,8 @@
     <div class="overlay">
       <div class="content-box">
         <h1>Bolsista Validado</h1>
+
+      
 
         <p>Olá, <strong>{{ nome }}</strong>.</p>
         <p>Estado do laboratório: <strong>{{ estado }}</strong></p>
@@ -181,5 +177,19 @@
       </div>
     </div>
   </section>
+
+  <!-- Script de contagem regressiva -->
+  <script>
+    let segundos = 30;
+    const contador = document.getElementById('contador');
+
+    const intervalo = setInterval(() => {
+      segundos--;
+      contador.textContent = segundos;
+      if (segundos <= 0) {
+        clearInterval(intervalo);
+      }
+    }, 1000);
+  </script>
 </body>
 </html>
