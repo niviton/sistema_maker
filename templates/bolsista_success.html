@@ -179,17 +179,29 @@
   </section>
 
   <!-- Script de contagem regressiva -->
-  <script>
-    let segundos = 30;
-    const contador = document.getElementById('contador');
+      <!-- ... seu HTML anterior ... -->
 
-    const intervalo = setInterval(() => {
-      segundos--;
-      contador.textContent = segundos;
-      if (segundos <= 0) {
-        clearInterval(intervalo);
-      }
-    }, 1000);
-  </script>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        const nomeUsuario = "{{ nome }}";
+        const mensagem = `Olá ${nomeUsuario}, tudo bem com você? A porta está aberta.`;
+        const utterance = new SpeechSynthesisUtterance(mensagem);
+        speechSynthesis.speak(utterance);
+
+        let seconds = 30;
+        const contadorEl = document.getElementById('contador');
+        const intervalId = setInterval(() => {
+          seconds--;
+          contadorEl.textContent = seconds;
+          if (seconds <= 0) {
+            clearInterval(intervalId);
+            window.location.href = "{{ url_for('index') }}";
+          }
+        }, 1000);
+      });
+    </script>
+  </body>
+</html>
+
 </body>
 </html>
