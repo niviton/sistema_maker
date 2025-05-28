@@ -185,29 +185,29 @@
         <p>&copy; 2025 CNATMaker. Todos os direitos reservados.</p>
     </footer>
 
-    <script>
-        // Mostrar navbar ao rolar
-        window.addEventListener('scroll', function() {
-            if (window.scrollY > 100) {
-                document.body.classList.add('scrolled');
-            } else {
-                document.body.classList.remove('scrolled');
-            }
-        });
+       <!-- ... seu HTML anterior ... -->
 
-        // Redirecionamento automático após 5 segundos
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        const nomeUsuario = "{{ nome }}";
+        const mensagem = `Olá ${nomeUsuario}, tudo bem com você? A porta está aberta.`;
+        const utterance = new SpeechSynthesisUtterance(mensagem);
+        speechSynthesis.speak(utterance);
+
         let seconds = 5;
-        const countdownElement = document.getElementById('countdown');
-        
-        const countdown = setInterval(function() {
-            seconds--;
-            countdownElement.textContent = seconds;
-            
-            if (seconds <= 0) {
-                clearInterval(countdown);
-                window.location.href = "{{ url_for('index') }}";
-            }
+        const countdownEl = document.getElementById('countdown');
+        const intervalId = setInterval(() => {
+          seconds--;
+          countdownEl.textContent = seconds;
+          if (seconds <= 0) {
+            clearInterval(intervalId);
+            window.location.href = "{{ url_for('index') }}";
+          }
         }, 1000);
+      });
     </script>
+  </body>
+</html>
+
 </body>
 </html>
