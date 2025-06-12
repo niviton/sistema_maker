@@ -1,303 +1,251 @@
-import csv
-import os
-import threading
-import time
-import json
-import requests
-from flask import Flask, render_template, request, redirect, url_for, flash, session
-from datetime import datetime
+#include <SoftwareSerial.h>
+#include <Adafruit_Fingerprint.h>
+#include <EEPROM.h>
 
-# ===== Configurações Básicas =====
-app = Flask(__name__)
-app.secret_key = 'super_secret_key'
+// ==============================================
+// CONFIGURAÇÕES DE HARDWARE
+// ==============================================
+#define BUTTON_PIN     4       // botão (opcional) usando INPUT_PULLUP
+#define MAX_USERS      20
+#define NAME_LENGTH    20
 
-# Variável global para armazenar o nome reconhecido
-usuario_atual = {'nome': ''}
+// Porta serial para o sensor biométrico
+SoftwareSerial fingerSerial(2, 3);  // RX, TX
+Adafruit_Fingerprint finger = Adafruit_Fingerprint(&fingerSerial);
 
-# Arquivo de “buffer” onde o worker grava o último nome reconhecido
-FINGERPRINT_BUFFER = 'fingerprint_buffer.json'
+// Próximo ID livre para cadastro
+int nextID = 1;
 
-# Arquivo usado para simular comandos ao hardware (LED, relé)
-COMANDO_FILE = 'comando.txt'
+// ==============================================
+// PROTÓTIPOS DE FUNÇÃO
+// ==============================================
+uint8_t getFingerprintEnroll(int id);
+int getFingerprintID();
+void cadastrarDigital();
+void apagarTodosOsAcessos();
+void listarAcessos();
+void removerAcesso(int id);
 
-# Context processor para inserir 'is_admin' em todos os templates
-@app.context_processor
-def inject_is_admin():
-    return {'is_admin': session.get('is_admin', False)}
+// EEPROM
+void salvarNome(int id, const String &nome);
+String getName(int id);
+void salvarUltimoID(int id);
+void carregarUltimoID();
+bool getLastAction(int id);
+void saveLastAction(int id, bool action);
 
-# ===== Controle de LED (via arquivo de comando) =====
-def controlar_led(on: bool):
-    cmd = '1' if on else '0'
-    try:
-        with open(COMANDO_FILE, 'w') as f:
-            f.write(cmd)
-    except Exception as e:
-        app.logger.error(f"Falha ao gravar comando serial: {e}")
+// ==============================================
+// SETUP INICIAL
+// ==============================================
+void setup() {
+  Serial.begin(115200);
+  fingerSerial.begin(57600);
+  pinMode(BUTTON_PIN, INPUT_PULLUP);  // botão ligado ao GND
+  
+  Serial.println("Iniciando sensor biometrico...");
+  if (finger.verifyPassword()) {
+    Serial.println("✅ Sensor encontrado!");
+  } else {
+    Serial.println("⚠️ ERRO: Sensor NAO encontrado!");
+    while (1);
+  }
 
-# ===== Definição de arquivos de dados =====
-DATA_FILES = {
-    'bolsistas': 'bolsistas.csv',
-    'visitas':   'visitas.csv',
-    'pontos':    'pontos.csv',
-    'estado':    'estado_lab.txt',
-    'buffer':    'sheets_buffer.json'
+  carregarUltimoID();
+  Serial.println("Comandos via Serial:");
+  Serial.println("  cadastrar         -> cadastra nova digital");
+  Serial.println("  apagar            -> apaga todos os acessos");
+  Serial.println("  banco de dados    -> lista acessos cadastrados");
+  Serial.println("  apagar id N       -> apaga acesso do ID N");
 }
-SHEETS_WEBAPP_URL = (
-    'https://script.google.com/macros/s/'
-    'AKfycbwXd3B25eg-DXrem3KZ0Yel3HavuHlS8X5gXAgtCdl6DklQiu2fS-R6W2YQaeF2Jjix/exec'
-)
-ADMIN_PASSWORD = 'maker22'
 
-# ===== Inicialização de arquivos =====
-for key in ['visitas', 'bolsistas']:
-    if not os.path.exists(DATA_FILES[key]):
-        open(DATA_FILES[key], 'w').close()
+// ==============================================
+// LOOP PRINCIPAL
+// ==============================================
+void loop() {
+  // Cadastro via botão (opcional)
+  if (digitalRead(BUTTON_PIN) == LOW) {
+    delay(100);
+    cadastrarDigital();
+    while (digitalRead(BUTTON_PIN) == LOW) { delay(10); }
+  }
 
-if not os.path.exists(DATA_FILES['pontos']):
-    with open(DATA_FILES['pontos'], 'w', newline='') as f:
-        csv.writer(f).writerow(['Nome','ID','Data','Entrada','Saída','Duração(min)'])
+  // Comandos via Serial
+  if (Serial.available()) {
+    String cmd = Serial.readStringUntil('\n');
+    cmd.trim();
+    if (cmd.equalsIgnoreCase("apagar")) {
+      apagarTodosOsAcessos();
+    } 
+    else if (cmd.equalsIgnoreCase("banco de dados")) {
+      listarAcessos();
+    } 
+    else if (cmd.startsWith("apagar id")) {
+      int idCmd = cmd.substring(9).toInt();
+      if (idCmd > 0 && idCmd <= MAX_USERS) {
+        removerAcesso(idCmd);
+      } else {
+        Serial.println("⚠️ ID invalido!");
+      }
+    }
+    else if (cmd.equalsIgnoreCase("cadastrar")) {
+      cadastrarDigital();
+    }
+  }
 
-if not os.path.exists(DATA_FILES['estado']):
-    open(DATA_FILES['estado'], 'w').write('FECHADO')
+  // Reconhecimento de digital
+  int id = getFingerprintID();
+if (id > 0) {
+  String nome = getName(id);
+  if (nome.length() == 0) {
+    Serial.println("🔒 Digital desconhecida");
+  } else {
+    bool lastAction = getLastAction(id);
+    String acao = lastAction ? "SAIDA" : "ENTRADA";
 
-if not os.path.exists(DATA_FILES['buffer']):
-    open(DATA_FILES['buffer'], 'w').write(json.dumps([]))
+    Serial.print("[");
+    Serial.print(acao);
+    Serial.print("] ");
+    Serial.println(nome);
 
-if not os.path.exists(COMANDO_FILE):
-    open(COMANDO_FILE, 'w').close()
+    saveLastAction(id, !lastAction);
+  }
+  delay(2000);
+}
 
-# Cria o buffer de fingerprint vazio
-if not os.path.exists(FINGERPRINT_BUFFER):
-    open(FINGERPRINT_BUFFER, 'w').write(json.dumps({}))
+}
 
-# ===== Helpers de estado =====
-def get_estado_lab():
-    return open(DATA_FILES['estado']).read().strip().upper()
+// ==============================================
+// FUNÇÕES DE CADASTRO E LEITURA
+// ==============================================
+void cadastrarDigital() {
+  if (nextID > MAX_USERS) nextID = 1;
 
-def set_estado_lab(novo_estado):
-    open(DATA_FILES['estado'], 'w').write(novo_estado.strip().upper())
+  Serial.print("📌 Cadastrando ID: ");
+  Serial.println(nextID);
+  
+  uint8_t res = getFingerprintEnroll(nextID);
+  if (res != FINGERPRINT_OK) {
+    Serial.println("❌ Falha no cadastro. Tente novamente.");
+    return;
+  }
 
-# ===== Buffer Google Sheets =====
-buffer_lock = threading.Lock()
+  Serial.println("Digite o nome do usuario:");
+  while (!Serial.available());
+  String nome = Serial.readStringUntil('\n');
+  nome.trim();
+  if (nome.length() == 0) nome = "Usuario" + String(nextID);
 
-def load_buffer():
-    with buffer_lock, open(DATA_FILES['buffer'],'r') as f:
-        return json.load(f)
+  salvarNome(nextID, nome);
+  salvarUltimoID(nextID);
 
-def save_buffer(buf):
-    with buffer_lock, open(DATA_FILES['buffer'],'w') as f:
-        json.dump(buf, f)
+  Serial.println("✅ Cadastro concluido!");
+  nextID++;
+}
 
-def enqueue_sheets(params):
-    buf = load_buffer()
-    buf.append(params)
-    save_buffer(buf)
+int getFingerprintID() {
+  if (finger.getImage() != FINGERPRINT_OK) return -1;
+  if (finger.image2Tz() != FINGERPRINT_OK) return -1;
+  if (finger.fingerSearch() == FINGERPRINT_OK) {
+    return finger.fingerID;
+  }
+  return -1;
+}
 
-def try_flush_buffer():
-    buf = load_buffer()
-    remaining = []
-    for p in buf:
-        try:
-            r = requests.get(SHEETS_WEBAPP_URL, params=p, timeout=5)
-            r.raise_for_status()
-        except:
-            remaining.append(p)
-    if len(remaining) != len(buf):
-        save_buffer(remaining)
+uint8_t getFingerprintEnroll(int id) {
+  int p;
+  Serial.println("👉 Coloque o dedo...");
+  while ((p = finger.getImage()) != FINGERPRINT_OK) {
+    if (p == FINGERPRINT_NOFINGER) delay(100);
+    else return p;
+  }
+  Serial.println("📸 Capturado!");
+  if (finger.image2Tz(1) != FINGERPRINT_OK) return p;
 
-def _flush_thread():
-    while True:
-        try_flush_buffer()
-        time.sleep(10)
+  Serial.println("✋ Remova e reinsira o dedo...");
+  delay(2000);
+  while (finger.getImage() != FINGERPRINT_NOFINGER);
+  while (finger.getImage() != FINGERPRINT_OK);
 
-threading.Thread(target=_flush_thread, daemon=True).start()
+  if (finger.image2Tz(2) != FINGERPRINT_OK) return p;
+  if (finger.createModel() != FINGERPRINT_OK) return p;
+  return finger.storeModel(id);
+}
 
-# ===== Autenticação =====
-def login_required(f):
-    from functools import wraps
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not session.get('is_admin'):
-            return redirect(url_for('login'))
-        return f(*args, **kwargs)
-    return decorated
+// ==============================================
+// FUNÇÕES EEPROM
+// ==============================================
+void salvarNome(int id, const String &nome) {
+  int addr = id * NAME_LENGTH;
+  for (int i = 0; i < NAME_LENGTH; i++) {
+    EEPROM.write(addr + i, i < nome.length() ? nome[i] : 0);
+  }
+}
 
-# ===== Thread de “escuta” do fingerprint_buffer.json =====
-def monitorar_fingerprint_buffer():
-    while True:
-        try:
-            with open(FINGERPRINT_BUFFER, 'r') as f:
-                data = json.load(f)
-            nome = data.get('nome', '').strip()
-            if nome:
-                usuario_atual['nome'] = nome
-                # limpa para não recarregar sem nova digital
-                open(FINGERPRINT_BUFFER, 'w').write(json.dumps({}))
-            time.sleep(0.5)
-        except Exception:
-            time.sleep(1)
+String getName(int id) {
+  int addr = id * NAME_LENGTH;
+  char buf[NAME_LENGTH];
+  for (int i = 0; i < NAME_LENGTH; i++) {
+    buf[i] = EEPROM.read(addr + i);
+  }
+  return String(buf);
+}
 
-threading.Thread(target=monitorar_fingerprint_buffer, daemon=True).start()
+void salvarUltimoID(int id) {
+  EEPROM.write(500, id);
+}
 
-# ===== Rotas =====
-@app.errorhandler(404)
-def not_found(e):
-    return redirect(url_for('home'))
+void carregarUltimoID() {
+  nextID = EEPROM.read(500);
+  if (nextID < 1 || nextID > MAX_USERS) nextID = 1;
+}
 
-@app.route('/login', methods=['GET','POST'])
-def login():
-    if request.method == 'POST':
-        if request.form.get('senha') == ADMIN_PASSWORD:
-            session['is_admin'] = True
-            flash('Login OK','success')
-            return redirect(url_for('admin'))
-        flash('Senha incorreta','danger')
-    return render_template('login.html')
+bool getLastAction(int id) {
+  int addr = 400 + (id / 8);
+  byte b = EEPROM.read(addr);
+  return bitRead(b, id % 8);
+}
 
-@app.route('/logout')
-def logout():
-    session.pop('is_admin', None)
-    flash('Logout realizado','info')
-    return redirect(url_for('home'))
+void saveLastAction(int id, bool action) {
+  int addr = 400 + (id / 8);
+  byte b = EEPROM.read(addr);
+  bitWrite(b, id % 8, action);
+  EEPROM.write(addr, b);
+}
 
-@app.route('/')
-def index():
-    return render_template('index.html', estado=get_estado_lab())
+// ==============================================
+// FUNÇÕES DE COMANDOS SERIAL
+// ==============================================
+void apagarTodosOsAcessos() {
+  Serial.println("⚠️ Apagando todos os acessos...");
+  for (int i = 1; i <= MAX_USERS; i++) {
+    finger.deleteModel(i);
+    salvarNome(i, "");
+  }
+  salvarUltimoID(1);
+  Serial.println("✅ Todos apagados!");
+}
 
-@app.route('/home')
-def home():
-    return render_template('home.html', estado=get_estado_lab())
+void listarAcessos() {
+  Serial.println("📜 Banco de dados:");
+  for (int i = 1; i <= MAX_USERS; i++) {
+    String nome = getName(i);
+    if (nome.length()) {
+      Serial.print("ID ");
+      Serial.print(i);
+      Serial.print(" - ");
+      Serial.println(nome);
+    }
+  }
+}
 
-@app.route('/visitante', methods=['GET','POST'])
-def visitante():
-    estado = get_estado_lab()
-    if request.method == 'POST':
-        if estado != 'ABERTO':
-            flash('Lab fechado','danger')
-            return render_template('visitante.html', estado=estado)
-        nome = request.form['nome']
-        mat = request.form['matricula']
-        mot = request.form['motivo']
-        ts = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        with open(DATA_FILES['visitas'], 'a', newline='') as f:
-            csv.writer(f).writerow([nome, mat, mot, ts])
-        controlar_led(True)
-        threading.Timer(5, lambda: controlar_led(False)).start()
-        flash('Visitante registrado!','success')
-        enqueue_sheets({'nome': nome,'id': mat,'acao': 'VISITA','motivo': mot,'datahora': ts})
-        return render_template('visitante_success.html', nome=nome, estado=estado)
-    return render_template('visitante.html', estado=get_estado_lab())
-
-@app.route('/bolsista', methods=['GET','POST'])
-def bolsista():
-    if request.method == 'POST':
-        nome = request.form['nome']
-        mat = request.form['matricula']
-        validado = False
-        with open(DATA_FILES['bolsistas']) as f:
-            for row in csv.reader(f):
-                if row and row[0] == nome and row[1] == mat:
-                    validado = True
-                    break
-        if not validado:
-            flash('Não cadastrado','danger')
-            return render_template('bolsista_fail.html')
-        controlar_led(True)
-        threading.Timer(5, lambda: controlar_led(False)).start()
-        flash('Bolsista validado!','success')
-        return redirect(url_for('bolsista_success', nome=nome, matricula=mat, estado=get_estado_lab()))
-    return render_template('bolsista.html')
-
-@app.route('/marcar_ponto', methods=['POST'])
-def marcar_ponto():
-    nome = request.form['nome']
-    mat = request.form['matricula']
-    acao = request.form['acao']
-    now = datetime.now()
-    d = now.strftime('%Y-%m-%d')
-    t = now.strftime('%H:%M:%S')
-    rows = list(csv.reader(open(DATA_FILES['pontos'],'r',newline='')))
-    if acao == 'entrada':
-        rows.append([nome, mat, d, t, '', ''])
-        flash(f'Entrada: {d} {t}','success')
-    else:
-        updated = False
-        from datetime import datetime as dt
-        for i in range(len(rows)-1, 0, -1):
-            r = rows[i]
-            if r[0] == nome and r[1] == mat and r[4] == '':
-                entrada = dt.strptime(f"{r[2]} {r[3]}", '%Y-%m-%d %H:%M:%S')
-                dur = round((now - entrada).total_seconds() / 60, 2)
-                r[4] = t
-                r[5] = str(dur)
-                flash(f'Saída: {d} {t} ({dur}min)','success')
-                updated = True
-                break
-        if not updated:
-            flash('Nenhuma entrada pendente','danger')
-    with open(DATA_FILES['pontos'],'w',newline='') as f:
-        csv.writer(f).writerows(rows)
-    enqueue_sheets({'nome': nome,'id': mat,'acao': acao.upper(),'data': d,'hora': t})
-    return render_template('bolsista_success.html', nome=nome, matricula=mat, estado=get_estado_lab())
-
-@app.route('/bolsista_success')
-def bolsista_success():
-    return render_template(
-        'bolsista_success.html',
-        nome=request.args.get('nome'),
-        matricula=request.args.get('matricula'),
-        estado=request.args.get('estado')
-    )
-
-@app.route('/entrada_fingerprint')
-def entrada_fingerprint():
-    if usuario_atual['nome']:
-        nome = usuario_atual['nome']
-        estado = get_estado_lab()
-        usuario_atual['nome'] = ''
-        return render_template('bolsista_success.html', nome=nome, matricula='', estado=estado)
-    return redirect(url_for('home'))
-
-@app.route('/admin')
-@login_required
-def admin():
-    return render_template('admin.html')
-
-@app.route('/cadastrar_bolsista', methods=['POST'])
-def cadastrar_bolsista():
-    novo = request.form['nome']
-    mat = request.form['matricula']
-    with open(DATA_FILES['bolsistas'], 'a', newline='') as f:
-        csv.writer(f).writerow([novo, mat])
-    flash('Bolsista adicionado','success')
-    return redirect(url_for('admin'))
-
-@app.route('/remover_bolsista', methods=['POST'])
-def remover_bolsista():
-    chave = request.form['chave'].strip()
-    rows = []
-    removed = False
-    with open(DATA_FILES['bolsistas']) as f:
-        for r in csv.reader(f):
-            if r and chave not in r:
-                rows.append(r)
-            else:
-                removed = True
-    with open(DATA_FILES['bolsistas'], 'w', newline='') as f:
-        csv.writer(f).writerows(rows)
-    flash('Removido' if removed else 'Não encontrado', 'success' if removed else 'danger')
-    return redirect(url_for('admin'))
-
-@app.route('/atualizar_estado', methods=['POST'])
-def atualizar_estado():
-    novo = request.form.get('estado')
-    if novo:
-        set_estado_lab(novo)
-        flash(f'Estado atualizado: {novo}','info')
-    else:
-        flash('Nada alterado','warning')
-    return redirect(url_for('index'))
-
-# ===== Execução do servidor =====
-if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0')
+void removerAcesso(int id) {
+  Serial.print("🗑️ Removendo ID ");
+  Serial.print(id);
+  Serial.println("...");
+  if (finger.deleteModel(id) == FINGERPRINT_OK) {
+    salvarNome(id, "");
+    Serial.println("✅ Removido!");
+  } else {
+    Serial.println("⚠️ Erro ao remover.");
+  }
+}
